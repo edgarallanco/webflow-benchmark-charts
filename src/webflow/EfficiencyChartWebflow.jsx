@@ -1,12 +1,12 @@
 import React from 'react';
-import { declareComponent, props } from '@webflow/devlink';
 import EfficiencyChart from '../../shared/components/EfficiencyChart';
 import '../../shared/styles/charts.css';
 
 /**
  * Webflow Code Component wrapper for Efficiency Chart
+ * Props will be configured via webflow.json
  */
-function EfficiencyChartWebflow({
+export default function EfficiencyChartWebflow({
   metric = 'net sales'
 }) {
   return (
@@ -15,11 +15,3 @@ function EfficiencyChartWebflow({
     />
   );
 }
-
-export default declareComponent(EfficiencyChartWebflow, {
-  metric: props.enum(['net sales', 'gross sales', 'magic number'], {
-    displayName: 'Metric',
-    description: 'Efficiency metric to display',
-    defaultValue: 'net sales'
-  })
-});
