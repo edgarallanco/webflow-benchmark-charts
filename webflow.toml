@@ -1,0 +1,16 @@
+# Webflow Cloud Configuration
+# Documentation: https://developers.webflow.com/cloud
+
+[project]
+name = "scale-benchmark-charts"
+framework = "nextjs"
+build_command = "npm run build"
+output_directory = ".next"
+
+[deployment]
+# Webflow Cloud runs on Cloudflare Workers
+runtime = "cloudflare"
+
+# Environment variables (add your own in Webflow dashboard)
+# [env]
+# NODE_ENV = "production"

@@ -1,0 +1,43 @@
+{
+  "library": {
+    "name": "Scale Benchmark Charts",
+    "description": "Interactive benchmark charts powered by ApexCharts",
+    "version": "1.0.0"
+  },
+  "components": [
+    {
+      "name": "GrowthChart",
+      "displayName": "Growth Chart",
+      "description": "Displays growth metrics (Y/Y ARR, iCAGR, NNARR, Fwd ARR)",
+      "source": "src/webflow/GrowthChartWebflow.jsx"
+    },
+    {
+      "name": "BurnChart",
+      "displayName": "Burn Chart",
+      "description": "Displays burn metrics (Burn Multiple, Rule of 40, Operating Margin)",
+      "source": "src/webflow/BurnChartWebflow.jsx"
+    },
+    {
+      "name": "ChurnChart",
+      "displayName": "Churn Chart",
+      "description": "Displays churn metrics (Annualized Gross Churn, Annualized Retention)",
+      "source": "src/webflow/ChurnChartWebflow.jsx"
+    },
+    {
+      "name": "EfficiencyChart",
+      "displayName": "Efficiency Chart",
+      "description": "Displays efficiency metrics (Net Sales, Gross Sales, Magic Number)",
+      "source": "src/webflow/EfficiencyChartWebflow.jsx"
+    },
+    {
+      "name": "BenchmarkCharts",
+      "displayName": "All Benchmark Charts",
+      "description": "Displays all 4 benchmark charts with shared revenue range controls",
+      "source": "src/webflow/BenchmarkChartsWebflow.jsx"
+    }
+  ],
+  "build": {
+    "entry": "src/index.js",
+    "output": "dist"
+  }
+}
