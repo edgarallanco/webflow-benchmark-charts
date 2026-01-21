@@ -10,8 +10,9 @@ export const REVENUE_LABELS = [
   "$50M - $100M"
 ];
 
-// Chart colors for the three performance tiers
-export const CHART_COLORS = ["#234F41", "#0D71A9", "#E5A819"];
+// Chart colors for the three performance tiers (matching Figma design)
+// Good (50%ile): brown/tan, Better (75%ile): green, Best (90%ile): blue/purple
+export const CHART_COLORS = ["#9d917a", "#52B788", "#5B67CA"];
 
 // Percentile tier names
 export const TIER_NAMES = {
@@ -22,6 +23,7 @@ export const TIER_NAMES = {
 
 // Growth Chart Configuration
 export const GROWTH_CHART = {
+  title: "Growth",
   default: "y/y arr",
   type: "line",
   categories: 3,
@@ -72,6 +74,7 @@ export const GROWTH_CHART = {
 
 // Burn Chart Configuration
 export const BURN_CHART = {
+  title: "Burn",
   default: "multiple",
   type: "line",
   categories: 3,
@@ -113,6 +116,7 @@ export const BURN_CHART = {
 
 // Churn Chart Configuration
 export const CHURN_CHART = {
+  title: "Churn",
   default: "annualized gross",
   type: "bar",
   categories: 1,
@@ -142,6 +146,7 @@ export const CHURN_CHART = {
 
 // Efficiency Chart Configuration
 export const EFFICIENCY_CHART = {
+  title: "Efficiency",
   default: "net sales",
   type: "bar",
   categories: 1,

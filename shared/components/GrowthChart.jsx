@@ -7,6 +7,9 @@ export default function GrowthChart({
   revenue = 0,
   selectedMetric,
   onMetricChange,
+  showRevenueControls = true,
+  showExpandIcon = true,
+  onExpand,
   className = ''
 }) {
   return (
@@ -17,6 +20,9 @@ export default function GrowthChart({
       revenue={revenue}
       selectedMetric={selectedMetric}
       onMetricChange={onMetricChange}
+      showRevenueControls={showRevenueControls}
+      showExpandIcon={showExpandIcon}
+      onExpand={onExpand}
       className={className}
     />
   );

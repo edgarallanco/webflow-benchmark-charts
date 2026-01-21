@@ -4,10 +4,13 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  padding: 40px 20px;
+  font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: #f5f3f0;
+}
+
+.benchmark-charts .layout-revenue-selector {
+  margin-bottom: 32px;
 }
 
 /* Revenue Controls */
@@ -89,32 +92,63 @@
 }
 
 /* Charts Grid */
-.charts-grid {
+.benchmark-charts .charts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  position: relative; /* Positioning context for expanded charts */
+  min-height: 600px; /* Ensure grid has height for absolute positioning */
 }
 
 .chart-section {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  /* No background, padding, or shadow - the chart-card handles that */
 }
 
-.chart-section h3 {
-  margin: 0 0 20px 0;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #234F41;
-  color: #234F41;
-  font-size: 20px;
-  font-weight: 600;
+@media (max-width: 1100px) {
+  .benchmark-charts .charts-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Individual Chart Styles */
 .benchmark-chart {
+  position: relative;
   width: 100%;
+  height: auto;
+  box-sizing: border-box;
+}
+
+.benchmark-chart:not(.expanded) {
+  position: relative !important;
+  width: 100% !important;
+  height: auto !important;
+  padding: 0 !important;
+  background: transparent !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: auto !important;
+  max-width: none !important;
+  overflow: visible !important;
+  transform: none !important;
+}
+
+.benchmark-chart:not(.expanded) .chart-card {
+  background: white !important;
+  border-radius: 12px !important;
+  padding: 32px !important;
+  height: 100% !important;
+  min-height: auto !important;
+  box-shadow: none !important;
+  border: none !important;
+  display: block !important;
+  flex-direction: initial !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.benchmark-chart:not(.expanded) .chart-card:hover {
+  transform: translateY(-1px);
 }
 
 .metric-selector {
@@ -122,44 +156,50 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 15px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .metric-button {
-  padding: 8px 16px;
-  border: 2px solid #ddd;
+  padding: 10px 18px;
+  border: 1px solid #d0d0d0;
   background: white;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   transition: all 0.2s;
   white-space: nowrap;
+  color: #6b6b6b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .metric-button:hover {
-  border-color: #E5A819;
-  color: #E5A819;
+  border-color: #1a1a1a;
+  color: #1a1a1a;
+  background: #fafafa;
 }
 
 .metric-button.active {
-  background: #E5A819;
-  border-color: #E5A819;
+  background: #1a1a1a;
+  border-color: #1a1a1a;
   color: white;
 }
 
 .chart-description {
-  margin-bottom: 15px;
-  padding: 12px;
-  background: #f9f9f9;
-  border-left: 3px solid #234F41;
-  border-radius: 4px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #666;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: white;
+  border-left: 3px solid #1a1a1a;
+  border-radius: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #6b6b6b;
+  font-family: Georgia, 'Times New Roman', serif;
 }
 
 .chart-container {
   position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Responsive Design */
@@ -192,5 +232,1076 @@
 
   .button-group button {
     width: 100%;
+  }
+}
+
+/* Revenue Range Controls (per chart) */
+.revenue-range-controls {
+  margin-bottom: 20px;
+  padding: 20px 24px;
+  background: white;
+  color: #1a1a1a;
+  border-radius: 0;
+  border: 1px solid #e8e8e8;
+}
+
+.revenue-mode {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 15px;
+}
+
+.control-label {
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0;
+  color: #1a1a1a;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 400;
+  color: #6b6b6b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.radio-label input[type="radio"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: #1a1a1a;
+}
+
+.revenue-slider-container {
+  margin-top: 15px;
+}
+
+.slider-label {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  letter-spacing: 0;
+  color: #1a1a1a;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 11px;
+  opacity: 0.9;
+  position: relative;
+}
+
+.slider-tick-label {
+  flex: 0 0 auto;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 10px;
+  position: relative;
+}
+
+.slider-tick-label:first-child {
+  text-align: left;
+}
+
+.slider-tick-label:last-child {
+  text-align: right;
+}
+
+.revenue-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #e8e8e8;
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.revenue-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  cursor: grab;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s ease;
+}
+
+.revenue-slider::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.1);
+}
+
+.revenue-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  cursor: grab;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s ease;
+}
+
+.revenue-slider::-moz-range-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.1);
+}
+
+/* Chart Header with Expand Icon */
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+h3.chart-title {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+  color: #20211b;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  letter-spacing: 0;
+  line-height: 1.2;
+  border: none;
+}
+
+.expand-button {
+  background: #e6e1d6;
+  border: none;
+  padding: 4px;
+    cursor: pointer;
+  color: #20211b;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  margin-left: auto;
+  gap: 1px;
+}
+
+.expand-button:hover {
+  background: #cec6b6;
+}
+
+.expand-button svg {
+  width: 32px;
+  height: 32px;
+}
+
+/* Chart card wrapper */
+.chart-card {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  height: 100%;
+  box-shadow: none;
+  border: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Override ApexCharts legend markers with CSS circles */
+.apexcharts-legend-marker {
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50% !important;
+  margin-right: 8px !important;
+}
+
+/* Hide the SVG inside the marker, use background color instead */
+.apexcharts-legend-marker svg {
+  display: none !important;
+}
+
+/* Set background colors for legend markers */
+.apexcharts-legend-series:nth-child(1) .apexcharts-legend-marker {
+  background-color: #9d917a !important;
+}
+
+.apexcharts-legend-series:nth-child(2) .apexcharts-legend-marker {
+  background-color: #52B788 !important;
+}
+
+.apexcharts-legend-series:nth-child(3) .apexcharts-legend-marker {
+  background-color: #5B67CA !important;
+}
+
+/* Expanded state - covers the entire grid area (all 4 charts) */
+.benchmark-chart.expanded {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  background: #f5f3f0;
+  padding: 0;
+  border-radius: 0;
+  width: auto !important;
+  height: auto !important;
+  max-width: none;
+  max-height: none;
+  box-sizing: border-box;
+  overflow: auto;
+  animation: fadeInOverlay 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.benchmark-chart.expanded .chart-card {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  height: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: none;
+  box-sizing: border-box;
+  animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.benchmark-chart:not(.expanded) .chart-header {
+  padding-bottom: 0;
+  border-bottom: none;
+  margin-bottom: 15px;
+}
+
+.benchmark-chart:not(.expanded) .chart-container {
+  margin-top: 0;
+  flex: none;
+  min-height: auto;
+}
+
+.benchmark-chart.expanded .revenue-range-controls {
+  margin-bottom: 30px;
+  flex-shrink: 0;
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.benchmark-chart.expanded .chart-header {
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 30px;
+  flex-shrink: 0;
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.benchmark-chart.expanded .metric-selector {
+  margin-bottom: 30px;
+  flex-shrink: 0;
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+}
+
+.benchmark-chart.expanded .chart-description {
+  background: white;
+  border-left: 3px solid #1a1a1a;
+  margin-bottom: 30px;
+  flex-shrink: 0;
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
+  border-radius: 0;
+}
+
+.benchmark-chart.expanded .chart-container {
+  margin-top: 0;
+  flex: 1;
+  min-height: 0;
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+}
+
+.benchmark-chart.expanded .expand-button {
+  color: #20211b;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Benchmark Charts Layout */
+.benchmark-charts-layout {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background: #f5f3f0;
+}
+
+/* Subtle Divider at top */
+.layout-divider {
+  width: 100%;
+  height: 1px;
+  background: #cec6b6;
+  margin-bottom: 32px;
+}
+
+/* Layout Header */
+.layout-header {
+  margin-bottom: 40px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.layout-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #20211b;
+  white-space: nowrap;
+  font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.3;
+}
+
+.layout-description {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.3;
+  color: #504b41;
+  font-family: 'Serrif-TRIAL', Georgia, 'Times New Roman', serif;
+}
+
+/* Revenue Selector */
+.layout-revenue-selector {
+  margin-bottom: 32px;
+  padding: 20px 32px;
+  background: white;
+  border-radius: 12px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.revenue-selector-label {
+  flex: 1 0 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: #20211b;
+  font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.3;
+  white-space: pre-wrap;
+}
+
+.revenue-options {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-shrink: 0;
+}
+
+.revenue-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.revenue-option input[type="radio"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #20211b;
+}
+
+.revenue-option-label {
+  cursor: pointer;
+  white-space: pre;
+  font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  color: #9d917a;
+  transition: color 0.2s;
+}
+
+.revenue-option input[type="radio"]:checked + .revenue-option-label {
+  color: #20211b;
+}
+
+/* Dropdown (hidden on desktop, shown on mobile) */
+.revenue-dropdown {
+  display: none;
+  padding: 10px 16px;
+  padding-right: 40px; /* Extra space for dropdown caret, matching left padding visually */
+  font-size: 14px;
+  font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-weight: 500;
+  color: #20211b;
+  background: white;
+  border: 1px solid #cec6b6;
+  border-radius: 6px;
+  cursor: pointer;
+  outline: none;
+  width: 100%;
+  max-width: 300px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2320211b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+
+.revenue-dropdown:focus {
+  border-color: #20211b;
+}
+
+/* Charts Grid Layout */
+.benchmark-charts-layout .charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  position: relative; /* Positioning context for expanded charts */
+  min-height: 600px; /* Ensure grid has height for absolute positioning */
+}
+
+.benchmark-charts-layout .chart-item {
+  /* No background, padding, or shadow - the chart-card handles that */
+}
+
+@media (max-width: 768px) {
+  /* Hide radio buttons on mobile */
+  .revenue-options-desktop {
+    display: none !important;
+  }
+
+  /* Show dropdown on mobile */
+  .revenue-dropdown-mobile {
+    display: block;
+  }
+
+  .layout-revenue-selector {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .revenue-dropdown {
+    width: 100%;
+    max-width: none;
+  }
+
+  /* Main containers with consistent padding */
+  .benchmark-charts-layout,
+  .benchmark-charts {
+    padding-left: 16px;
+    padding-right: 16px;
+    max-width: 100vw;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+
+  /* Align charts grid with revenue selector box */
+  .benchmark-charts .charts-grid,
+  .benchmark-charts-layout .charts-grid {
+    padding-left: 0;
+    padding-right: 0;
+    gap: 16px;
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Remove chart section padding for proper alignment */
+  .chart-section {
+    padding: 0 !important;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Reduce chart card padding to fit iPhone viewport */
+  .benchmark-chart:not(.expanded) .chart-card {
+    padding: 16px !important;
+    box-sizing: border-box;
+  }
+
+  .benchmark-chart.expanded .chart-card {
+    padding: 20px !important;
+    box-sizing: border-box;
+  }
+
+  /* Ensure proper width reset on collapse */
+  .benchmark-chart:not(.expanded) {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Revenue selector adjustments for mobile */
+  .layout-revenue-selector {
+    padding: 16px 20px;
+    box-sizing: border-box;
+  }
+
+  .revenue-selector-label {
+    font-size: 11px;
+  }
+
+  .revenue-dropdown {
+    font-size: 13px;
+    padding: 8px 12px;
+    padding-right: 36px;
+    background-position: right 12px center;
+  }
+}
+
+@media (max-width: 1100px) {
+  .benchmark-charts-layout .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .layout-header {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .layout-title {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 1100px) {
+  .benchmark-charts-layout .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .slider-labels {
+    font-size: 10px;
+  }
+
+  .slider-label-mark {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 768px) {
+  .layout-revenue-control {
+    padding: 20px;
+  }
+
+  .revenue-mode-section {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .slider-labels {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+}
+
+/* ========================================
+   Benchmark Survey Layout Styles
+   ======================================== */
+
+/* Main Survey Layout */
+.benchmark-survey-layout {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background: #f5f3f0;
+  font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+/* Survey Header */
+.survey-header {
+  margin-bottom: 40px;
+}
+
+.survey-header-accent {
+  width: 60px;
+  height: 4px;
+  background: #e5a819;
+  margin-bottom: 24px;
+  border-radius: 2px;
+}
+
+.survey-title {
+  margin: 0 0 16px 0;
+  font-size: 42px;
+  font-weight: 700;
+  color: #20211b;
+  line-height: 1.2;
+  font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.survey-description {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.5;
+  color: #504b41;
+  max-width: 800px;
+  font-family: 'Serrif-TRIAL', Georgia, 'Times New Roman', serif;
+}
+
+/* Survey Content - Two Column Layout */
+.survey-content {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 32px;
+  position: relative;
+}
+
+/* Mobile Filter Toggle (hidden on desktop) */
+.mobile-filter-toggle {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: white;
+  border: 1px solid #cec6b6;
+  border-radius: 8px;
+  color: #20211b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 20px;
+  width: 100%;
+  font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  transition: background 0.2s;
+}
+
+.mobile-filter-toggle:hover {
+  background: #fafaf8;
+}
+
+.mobile-filter-toggle svg {
+  flex-shrink: 0;
+}
+
+/* Mobile Sidebar Overlay */
+.mobile-sidebar-overlay {
+  display: none;
+}
+
+.mobile-sidebar-close {
+  display: none;
+}
+
+/* Filter Sidebar */
+.survey-sidebar {
+  position: sticky;
+  top: 20px;
+  height: fit-content;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+.filter-sidebar {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e6e1d6;
+}
+
+.filter-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #20211b;
+  font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.clear-filters-btn {
+  background: none;
+  border: none;
+  color: #9d917a;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.clear-filters-btn:hover {
+  color: #20211b;
+  background: #f5f3f0;
+}
+
+/* Filter Sections */
+.filter-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.filter-section {
+  border-bottom: 1px solid #f0ebe3;
+  padding-bottom: 16px;
+}
+
+.filter-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.filter-section-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.filter-section-header:hover {
+  opacity: 0.7;
+}
+
+.filter-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #20211b;
+  text-align: left;
+  font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.filter-section-icon {
+  color: #9d917a;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.filter-section-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  padding-left: 4px;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.filter-option input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #20211b;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.filter-option-label {
+  font-size: 13px;
+  font-weight: 400;
+  color: #504b41;
+  cursor: pointer;
+  user-select: none;
+  font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.filter-option:hover .filter-option-label {
+  color: #20211b;
+}
+
+/* Survey Main Area */
+.survey-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+/* Tab Navigation */
+.tab-navigation {
+  background: white;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.tab-scroll-container {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tab-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-button {
+  flex-shrink: 0;
+  padding: 12px 20px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #9d917a;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.tab-button:hover {
+  color: #20211b;
+  background: #f5f3f0;
+}
+
+.tab-button.active {
+  background: #20211b;
+  color: white;
+}
+
+/* Survey Data Area */
+.survey-data-area {
+  background: white;
+  border-radius: 12px;
+  padding: 48px;
+  min-height: 500px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Placeholder State */
+.survey-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+}
+
+.placeholder-icon {
+  width: 80px;
+  height: 80px;
+  background: #f5f3f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  color: #9d917a;
+}
+
+.placeholder-title {
+  margin: 0 0 12px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #20211b;
+  font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.placeholder-text {
+  margin: 0;
+  font-size: 15px;
+  color: #9d917a;
+  max-width: 400px;
+  line-height: 1.5;
+  font-family: 'Serrif-TRIAL', Georgia, 'Times New Roman', serif;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .survey-content {
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+  }
+
+  .survey-title {
+    font-size: 36px;
+  }
+
+  .survey-data-area {
+    padding: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .benchmark-survey-layout {
+    padding: 20px 16px;
+  }
+
+  .survey-title {
+    font-size: 28px;
+  }
+
+  .survey-description {
+    font-size: 16px;
+  }
+
+  /* Show mobile filter toggle */
+  .mobile-filter-toggle {
+    display: flex;
+  }
+
+  /* Single column layout on mobile */
+  .survey-content {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  /* Mobile Sidebar Styling */
+  .survey-sidebar {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 85%;
+    max-width: 320px;
+    height: 100vh;
+    background: white;
+    z-index: 1001;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    max-height: 100vh;
+  }
+
+  .survey-sidebar.open {
+    left: 0;
+  }
+
+  .mobile-sidebar-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    background: #f5f3f0;
+    border: none;
+    border-radius: 8px;
+    color: #20211b;
+    cursor: pointer;
+    z-index: 10;
+    transition: background 0.2s;
+  }
+
+  .mobile-sidebar-close:hover {
+    background: #e6e1d6;
+  }
+
+  .mobile-sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .filter-sidebar {
+    padding: 48px 20px 20px;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .tab-navigation {
+    margin-top: 0;
+  }
+
+  .survey-data-area {
+    padding: 24px 20px;
+  }
+
+  .placeholder-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .placeholder-icon svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .placeholder-title {
+    font-size: 18px;
+  }
+
+  .placeholder-text {
+    font-size: 14px;
   }
 }

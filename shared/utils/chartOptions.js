@@ -11,8 +11,10 @@ import { CHART_COLORS, REVENUE_LABELS } from '../data/chartData';
 export function buildChartOptions(chartConfig, metricKey, revenueSetup = 'all', revenue = 0) {
   const metric = chartConfig.metrics[metricKey];
 
-  // Calculate visible data range
-  const { startIndex, endIndex } = getDataRange(revenueSetup, revenue);
+  // Calculate visible data range (only for charts with multiple revenue ranges)
+  const { startIndex, endIndex } = chartConfig.categories === 1
+    ? { startIndex: 0, endIndex: 1 }
+    : getDataRange(revenueSetup, revenue);
 
   // Build series data
   const series = Object.keys(metric.series).map(tierName => ({
@@ -26,15 +28,118 @@ export function buildChartOptions(chartConfig, metricKey, revenueSetup = 'all', 
       type: chartConfig.type,
       toolbar: {
         show: false
+      },
+      fontFamily: 'Saans-TRIAL, -apple-system, BlinkMacSystemFont, sans-serif',
+      foreColor: '#20211b',
+      animations: {
+        enabled: true,
+        easing: 'easeInOutCubic',
+        speed: 1000,
+        animateGradually: {
+          enabled: false,
+          delay: 250,
+        },
+        dynamicAnimation: {
+          enabled: true,
+          speed: 300
+        }
       }
     },
     colors: CHART_COLORS,
     series,
-    xaxis: {},
-    yaxis: {},
-    stroke: {},
-    dataLabels: {},
-    tooltip: {}
+    xaxis: {
+      labels: {
+        style: {
+          fontSize: '12px',
+          fontWeight: 400,
+          colors: '#20211b'
+        }
+      },
+      axisBorder: {
+        show: true,
+        color: '#e6e1d6'
+      },
+      axisTicks: {
+        show: false
+      }
+    },
+    yaxis: {
+      labels: {
+        style: {
+          fontSize: '12px',
+          fontWeight: 400,
+          colors: '#20211b'
+        }
+      }
+    },
+    stroke: chartConfig.type === 'bar' ? {
+      show: true,
+      width: 0,
+      colors: CHART_COLORS
+    } : {
+      width: 7,
+      curve: 'straight'
+    },
+    dataLabels: {
+      enabled: chartConfig.type === 'bar',
+      style: {
+        fontSize: '14px',
+        fontFamily: 'Saans-TRIAL, -apple-system, BlinkMacSystemFont, sans-serif',
+        fontWeight: 600,
+        colors: ['#ffffff']
+      },
+      offsetY: 0
+    },
+    tooltip: {
+      theme: 'light',
+      style: {
+        fontSize: '12px',
+        fontFamily: 'Saans-TRIAL, -apple-system, BlinkMacSystemFont, sans-serif'
+      }
+    },
+    legend: {
+      show: true,
+      position: 'bottom',
+      horizontalAlign: 'center',
+      fontSize: '12px',
+      fontFamily: 'Saans-TRIAL, -apple-system, BlinkMacSystemFont, sans-serif',
+      fontWeight: 400,
+      labels: {
+        colors: '#20211b'
+      },
+      markers: {
+        width: 16,
+        height: 16,
+        radius: 8,
+        shape: 'circle',
+        offsetX: -4,
+        offsetY: 0
+      },
+      itemMargin: {
+        horizontal: 16,
+        vertical: 8
+      }
+    },
+    grid: {
+      borderColor: '#e6e1d6',
+      strokeDashArray: 0,
+      xaxis: {
+        lines: {
+          show: false
+        }
+      },
+      yaxis: {
+        lines: {
+          show: true
+        }
+      },
+      padding: {
+        top: 0,
+        right: 20,
+        bottom: 0,
+        left: 10
+      }
+    }
   };
 
   // Set x-axis categories
@@ -47,8 +152,13 @@ export function buildChartOptions(chartConfig, metricKey, revenueSetup = 'all', 
   // Set formatters if defined
   const formatter = metric.formatter || chartConfig.formatter;
   if (formatter) {
-    options.yaxis.labels = { formatter };
-    options.dataLabels.formatter = formatter;
+    options.yaxis.labels = {
+      ...options.yaxis.labels,
+      formatter
+    };
+    if (chartConfig.type === 'bar') {
+      options.dataLabels.formatter = formatter;
+    }
   }
 
   // Set tooltip ordering
@@ -86,6 +196,7 @@ export function buildChartOptions(chartConfig, metricKey, revenueSetup = 'all', 
 function getDataRange(revenueSetup, revenue) {
   const maxIndex = REVENUE_LABELS.length - 1;
 
+  // When "all" is selected, show ALL 7 ranges
   if (revenueSetup === 'all') {
     return { startIndex: 0, endIndex: REVENUE_LABELS.length };
   }

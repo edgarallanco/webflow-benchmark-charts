@@ -2,42 +2,69 @@
   "library": {
     "name": "Scale Benchmark Charts",
     "description": "Interactive benchmark charts powered by ApexCharts",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "components": [
+      "**/*.webflow.@(js|jsx|mjs|ts|tsx)"
+    ],
+    "id": "scale-benchmark-charts"
+  },
+  "devlink": {
+    "enabled": false,
+    "rootDir": "./devlink"
   },
   "components": [
     {
       "name": "GrowthChart",
       "displayName": "Growth Chart",
       "description": "Displays growth metrics (Y/Y ARR, iCAGR, NNARR, Fwd ARR)",
-      "source": "src/webflow/GrowthChartWebflow.jsx"
+      "source": "src/webflow/GrowthChart.webflow.jsx"
     },
     {
       "name": "BurnChart",
       "displayName": "Burn Chart",
       "description": "Displays burn metrics (Burn Multiple, Rule of 40, Operating Margin)",
-      "source": "src/webflow/BurnChartWebflow.jsx"
+      "source": "src/webflow/BurnChart.webflow.jsx"
     },
     {
       "name": "ChurnChart",
       "displayName": "Churn Chart",
       "description": "Displays churn metrics (Annualized Gross Churn, Annualized Retention)",
-      "source": "src/webflow/ChurnChartWebflow.jsx"
+      "source": "src/webflow/ChurnChart.webflow.jsx"
     },
     {
       "name": "EfficiencyChart",
       "displayName": "Efficiency Chart",
       "description": "Displays efficiency metrics (Net Sales, Gross Sales, Magic Number)",
-      "source": "src/webflow/EfficiencyChartWebflow.jsx"
+      "source": "src/webflow/EfficiencyChart.webflow.jsx"
     },
     {
       "name": "BenchmarkCharts",
       "displayName": "All Benchmark Charts",
       "description": "Displays all 4 benchmark charts with shared revenue range controls",
-      "source": "src/webflow/BenchmarkChartsWebflow.jsx"
+      "source": "src/webflow/BenchmarkCharts.webflow.jsx"
+    },
+    {
+      "name": "BenchmarkChartsLayout",
+      "displayName": "Benchmark Charts Layout",
+      "description": "Complete layout with all 4 benchmark charts and shared revenue control",
+      "source": "src/webflow/BenchmarkChartsLayout.webflow.jsx"
+    },
+    {
+      "name": "BenchmarkSurveyLayout",
+      "displayName": "Benchmark Survey Layout",
+      "description": "Complete benchmark survey layout with filters, tabs, and data area",
+      "source": "src/webflow/BenchmarkSurveyLayout.webflow.jsx"
     }
   ],
   "build": {
     "entry": "src/index.js",
     "output": "dist"
+  },
+  "telemetry": {
+    "global": {
+      "allowTelemetry": true,
+      "lastPrompted": 1769035870675,
+      "version": "1.8.44"
+    }
   }
 }
