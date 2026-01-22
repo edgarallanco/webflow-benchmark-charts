@@ -1,8 +1,8 @@
 import React from 'react';
 
 const BENCHMARK_CATEGORIES = [
-  { id: 'overall', label: 'Overall Performance Metrics' },
-  { id: 'revenue', label: 'Revenue Contribution Metrics' },
+  { id: 'overall-performance-metrics', label: 'Overall Performance Metrics' },
+  { id: 'revenue-contribution-metrics', label: 'Revenue Contribution Metrics' },
   { id: 'rep-quota', label: 'Rep & Quota Attainment Metrics' },
   { id: 'pipeline', label: 'Pipeline Metrics' },
   { id: 'headcount-ratios', label: 'Headcount Ratios' },
