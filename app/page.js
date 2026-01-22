@@ -9,8 +9,16 @@ export default function Home() {
       <h2>Available Charts</h2>
       <ul style={{ listStyle: 'none', padding: 0 }}>
         <li style={{ marginBottom: '10px' }}>
+          <Link href="/benchmark-survey" style={{ fontSize: '18px', color: '#0D71A9' }}>
+            📋 Benchmark Survey (New!)
+          </Link>
+          <p style={{ margin: '5px 0 0 0', color: '#666' }}>
+            Interactive benchmark data from 175+ SaaS companies with filtering
+          </p>
+        </li>
+        <li style={{ marginBottom: '10px' }}>
           <Link href="/all" style={{ fontSize: '18px', color: '#0D71A9' }}>
-            📊 All Charts (Recommended)
+            📊 All Charts
           </Link>
           <p style={{ margin: '5px 0 0 0', color: '#666' }}>
             View all 4 benchmark charts with interactive controls

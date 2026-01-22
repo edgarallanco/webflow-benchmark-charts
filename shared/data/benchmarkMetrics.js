@@ -203,6 +203,73 @@ export const BENCHMARK_CATEGORIES = {
   'headcount-function': {
     id: 'headcount-function',
     label: 'Headcount by Function',
-    metrics: []
+    metrics: [
+      {
+        name: 'Marketing Headcount',
+        label: 'Marketing Headcount',
+        description: 'Total marketing headcount',
+        format: 'number'
+      },
+      {
+        name: 'Marketing Ops Headcount',
+        label: 'Marketing Ops Headcount',
+        description: 'Total marketing operations headcount',
+        format: 'number'
+      },
+      {
+        name: 'SDR Headcount',
+        label: 'SDR Headcount',
+        description: 'Total sales development representative headcount',
+        format: 'number'
+      },
+      {
+        name: 'Sales Rep Headcount',
+        label: 'Sales Rep Headcount',
+        description: 'Total sales representative headcount',
+        format: 'number'
+      },
+      {
+        name: 'Sales Engineer Headcount',
+        label: 'Sales Engineer Headcount',
+        description: 'Total sales engineer headcount',
+        format: 'number'
+      },
+      {
+        name: 'Sales Manager Headcount',
+        label: 'Sales Manager Headcount',
+        description: 'Total sales manager headcount',
+        format: 'number'
+      },
+      {
+        name: 'Sales Ops Headcount',
+        label: 'Sales Ops Headcount',
+        description: 'Total sales operations headcount',
+        format: 'number'
+      },
+      {
+        name: 'Customer Success Headcount',
+        label: 'Customer Success Headcount',
+        description: 'Total customer success headcount',
+        format: 'number'
+      },
+      {
+        name: 'Customer Success Ops Headcount',
+        label: 'Customer Success Ops Headcount',
+        description: 'Total customer success operations headcount',
+        format: 'number'
+      },
+      {
+        name: 'RevOps Headcount',
+        label: 'RevOps Headcount',
+        description: 'Total revenue operations headcount',
+        format: 'number'
+      },
+      {
+        name: 'Partners and Channel Headcount',
+        label: 'Partners and Channel Headcount',
+        description: 'Total partners and channel headcount',
+        format: 'number'
+      }
+    ]
   }
 };

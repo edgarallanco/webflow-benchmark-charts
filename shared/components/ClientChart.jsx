@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, forwardRef } from 'react';
 
 /**
  * Client-side only wrapper for ApexCharts
  * Prevents "window is not defined" errors during build/SSR
  */
-export default function ClientChart({ options, series, type, height }) {
+const ClientChart = forwardRef(({ options, series, type, height }, ref) => {
   const [Chart, setChart] = useState(null);
 
   useEffect(() => {
@@ -18,5 +18,9 @@ export default function ClientChart({ options, series, type, height }) {
     return <div style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading chart...</div>;
   }
 
-  return <Chart options={options} series={series} type={type} height={height} />;
-}
+  return <Chart ref={ref} options={options} series={series} type={type} height={height} />;
+});
+
+ClientChart.displayName = 'ClientChart';
+
+export default ClientChart;

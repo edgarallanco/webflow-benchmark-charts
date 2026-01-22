@@ -1,76 +1,73 @@
+'use client';
+
 import React, { useState } from 'react';
-import FilterSidebar from './FilterSidebar';
-import TabNavigation from './TabNavigation';
+import BenchmarkSidebar from './BenchmarkSidebar';
 import BenchmarkDataDisplay from './BenchmarkDataDisplay';
+import BenchmarkFilters from './BenchmarkFilters';
 import { BENCHMARK_CATEGORIES } from '../data/benchmarkMetrics';
 
 export default function BenchmarkSurveyLayout({ className = '', children }) {
-  const [activeTab, setActiveTab] = useState('overall-performance-metrics');
+  const [activeCategory, setActiveCategory] = useState('overall-performance-metrics');
   const [selectedMetric, setSelectedMetric] = useState(null);
   const [filters, setFilters] = useState({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [showDownloadMenu, setShowDownloadMenu] = useState(false);
 
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-    console.log('Filters changed:', newFilters);
-  };
-
-  const handleTabChange = (newTab) => {
-    setActiveTab(newTab);
-    // Reset selected metric when changing tabs
-    const category = BENCHMARK_CATEGORIES[newTab];
-    if (category && category.metrics && category.metrics.length > 0) {
-      setSelectedMetric(category.metrics[0]);
-    } else {
-      setSelectedMetric(null);
-    }
+  const handleCategoryChange = (newCategory) => {
+    setActiveCategory(newCategory);
   };
 
   const handleMetricSelect = (metric) => {
     setSelectedMetric(metric);
   };
 
-  // Get current category and its metrics
-  const currentCategory = BENCHMARK_CATEGORIES[activeTab];
-  const hasMetrics = currentCategory && currentCategory.metrics && currentCategory.metrics.length > 0;
+  // Get current category
+  const currentCategory = BENCHMARK_CATEGORIES[activeCategory];
 
-  // Set initial metric when component mounts or tab changes
+  // Set initial metric when component mounts
   React.useEffect(() => {
-    if (hasMetrics && !selectedMetric) {
+    if (!selectedMetric && currentCategory && currentCategory.metrics && currentCategory.metrics.length > 0) {
       setSelectedMetric(currentCategory.metrics[0]);
     }
-  }, [activeTab, hasMetrics, selectedMetric, currentCategory]);
+  }, [activeCategory, selectedMetric, currentCategory]);
+
+  // Close filters on Escape key
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowFilters(false);
+        setShowDownloadMenu(false);
+      }
+    };
+
+    if (showFilters || showDownloadMenu) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [showFilters, showDownloadMenu]);
 
   return (
     <div className={`benchmark-survey-layout ${className}`}>
-      {/* Header Section */}
-      <div className="survey-header">
-        <div className="survey-header-accent"></div>
-        <h1 className="survey-title">Scale GTM Benchmarks</h1>
-        <p className="survey-description">
-          2025 benchmarks from 175 high-growth startups. Filter and compare key GTM metrics across different company segments.
-        </p>
-      </div>
+      {/* Main Container */}
+      <div className="survey-container">
+        {/* Top Bar with Choose Benchmark + Filters */}
+        <div className="survey-header-bar">
+          <h2 className="survey-section-title">Choose Your Benchmark</h2>
+          <button
+            className={`filters-button ${showFilters ? 'active' : ''}`}
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <span>Filters</span>
+            <svg width="12" height="8" viewBox="0 0 12 8" fill="none" className={showFilters ? 'rotated' : ''}>
+              <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        {/* Main Content Area */}
+        <div className="survey-content">
 
-      {/* Main Content Area */}
-      <div className="survey-content">
-        {/* Mobile Filter Toggle */}
-        <button
-          className="mobile-filter-toggle"
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M2.5 5.83333H17.5M5.83333 10H14.1667M8.33333 14.1667H11.6667"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-          Filters
-        </button>
-
-        {/* Sidebar Filters */}
+        {/* Sidebar */}
         <div className={`survey-sidebar ${isSidebarOpen ? 'open' : ''}`}>
           {isSidebarOpen && (
             <button
@@ -87,70 +84,94 @@ export default function BenchmarkSurveyLayout({ className = '', children }) {
               </svg>
             </button>
           )}
-          <FilterSidebar onFilterChange={handleFilterChange} />
+          <BenchmarkSidebar
+            activeCategory={activeCategory}
+            selectedMetric={selectedMetric}
+            onCategoryChange={handleCategoryChange}
+            onMetricSelect={handleMetricSelect}
+          />
         </div>
 
         {/* Main Area */}
-        <div className="survey-main">
-          {/* Tab Navigation */}
-          <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
-
+        <div className="survey-main-full">
           {/* Data Display Area */}
-          <div className="survey-data-area">
-            {hasMetrics ? (
+          <div className="survey-data-area-full">
+            {/* Filters Overlay - Constrained to this area */}
+            {showFilters && (
               <>
-                {/* Metric Selector Buttons */}
-                <div className="metric-selector-buttons">
-                  {currentCategory.metrics.map((metric) => (
-                    <button
-                      key={metric.name}
-                      className={`metric-select-button ${selectedMetric?.name === metric.name ? 'active' : ''}`}
-                      onClick={() => handleMetricSelect(metric)}
-                    >
-                      {metric.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Display Selected Metric Data */}
-                {selectedMetric && (
-                  <BenchmarkDataDisplay
-                    metricName={selectedMetric.name}
-                    metricLabel={selectedMetric.label}
-                    metricDescription={selectedMetric.description}
-                    format={selectedMetric.format}
+                <div className="filters-overlay-backdrop-constrained" onClick={() => setShowFilters(false)}></div>
+                <div className="filters-overlay-panel-constrained">
+                  <BenchmarkFilters
                     filters={filters}
+                    onFiltersChange={(newFilters) => {
+                      setFilters(newFilters);
+                      setShowFilters(false);
+                    }}
                   />
-                )}
-              </>
-            ) : (
-              children || (
-                <div className="survey-placeholder">
-                  <div className="placeholder-icon">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M3 3v18h18"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M7 16l4-4 3 3 5-7"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="placeholder-title">Select a benchmark to view data</h3>
-                  <p className="placeholder-text">
-                    Choose from the tabs above and apply filters to see relevant benchmark data
-                  </p>
                 </div>
-              )
+              </>
             )}
+
+            {/* Data Content */}
+            <div className="survey-data-content">
+              {selectedMetric ? (
+                <BenchmarkDataDisplay
+                  metricName={selectedMetric.name}
+                  metricLabel={selectedMetric.label}
+                  metricDescription={selectedMetric.description}
+                  format={selectedMetric.format}
+                  filters={filters}
+                  showDownloadMenu={showDownloadMenu}
+                  onDownloadMenuToggle={setShowDownloadMenu}
+                />
+              ) : (
+                children || (
+                  <div className="survey-placeholder">
+                    <div className="placeholder-icon">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                        <path
+                          d="M3 3v18h18"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M7 16l4-4 3 3 5-7"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="placeholder-title">Select a benchmark to view data</h3>
+                    <p className="placeholder-text">
+                      Choose a metric from the sidebar to see benchmark data
+                    </p>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Download Button - Bottom Right */}
+          <div className="survey-download-section-bottom">
+            <button
+              className="download-button"
+              onClick={() => setShowDownloadMenu(!showDownloadMenu)}
+            >
+              <span>Download</span>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path
+                  d="M6 1V9M6 9L3 6M6 9L9 6"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
@@ -162,6 +183,7 @@ export default function BenchmarkSurveyLayout({ className = '', children }) {
           onClick={() => setIsSidebarOpen(false)}
         ></div>
       )}
+      </div>
     </div>
   );
 }

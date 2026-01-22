@@ -1,4 +1,5 @@
 import './globals.css';
+import '../shared/styles/charts.css';
 
 export const metadata = {
   title: 'Scale Benchmark Charts',
