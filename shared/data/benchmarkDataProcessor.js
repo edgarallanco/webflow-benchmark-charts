@@ -98,23 +98,28 @@ function recordMatchesFilters(record, filters) {
     const fieldName = FILTER_FIELD_MAP[filterKey];
     if (!fieldName) continue;
 
-    const recordValue = record[fieldName];
-    if (!recordValue) return false;
-
     // Special handling for growth rate - map filter values to data values
     if (filterKey === 'growth-rate') {
+      const recordValue = record[fieldName];
+      if (!recordValue) return false;
       const valueMap = FILTER_VALUE_MAP['growth-rate'];
       const mappedValues = filterValues.map(fv => valueMap[fv]).filter(Boolean);
       const matches = mappedValues.includes(recordValue);
       if (!matches) return false;
     }
-    // Special handling for customer segments - use contains because companies can serve multiple segments
+    // Special handling for customer segments - use boolean columns to match old behavior
+    // Check the boolean column directly (e.g., "Enterprise (> $1B)" column)
     else if (filterKey === 'primary-customer-target-segment') {
-      const matches = filterValues.some(fv => recordValue.includes(fv));
+      const matches = filterValues.some(fv => {
+        // Check the boolean column with the exact segment name
+        return record[fv] === 'TRUE';
+      });
       if (!matches) return false;
     }
     // Special handling for incorporated AI
     else if (filterKey === 'incorporated-ai') {
+      const recordValue = record[fieldName];
+      if (!recordValue) return false;
       const matches = filterValues.some(fv => {
         if (fv === 'Yes' && recordValue === 'Yes') return true;
         if (fv === 'No' && recordValue === 'No') return true;
@@ -124,6 +129,8 @@ function recordMatchesFilters(record, filters) {
     }
     // Direct string matching for other filters
     else {
+      const recordValue = record[fieldName];
+      if (!recordValue) return false;
       const matches = filterValues.includes(recordValue);
       if (!matches) return false;
     }
