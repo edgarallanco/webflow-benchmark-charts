@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useImperativeHandle, forwardRef } from 'react';
 import ClientChart from './ClientChart';
 import { getChartData, formatValue } from '../data/benchmarkData';
 
-export default function BenchmarkDataDisplay({ metricName, metricLabel, metricDescription, format = 'percentage', filters = {}, showDownloadMenu = false, onDownloadMenuToggle }) {
+const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescription, format = 'percentage', filters = {} }, ref) => {
   const chartData = getChartData(metricName, filters);
-  const chartRef = React.useRef(null);
+  const chartId = `chart-${metricName.replace(/\s+/g, '-')}`;
+  const chartInstanceRef = React.useRef(null);
 
   // Build ApexCharts options
   const chartOptions = useMemo(() => {
@@ -17,8 +18,15 @@ export default function BenchmarkDataDisplay({ metricName, metricLabel, metricDe
     const values = chartData.map(d => d.value);
     const colors = chartData.map(d => d.type === 'mean' ? '#00c756' : '#9d917a');
 
+    // Calculate max value and add headroom for labels
+    const maxValue = Math.max(...values);
+    const yAxisMax = format === 'percentage'
+      ? Math.ceil(maxValue / 10) * 10 + 20  // Round up to nearest 10 and add 20 units headroom
+      : undefined;
+
     return {
       chart: {
+        id: chartId,
         type: 'bar',
         toolbar: {
           show: false,
@@ -38,16 +46,25 @@ export default function BenchmarkDataDisplay({ metricName, metricLabel, metricDe
         },
         fontFamily: 'Saans-TRIAL, -apple-system, BlinkMacSystemFont, sans-serif',
         foreColor: '#20211b',
+        background: '#ffffff',
         animations: {
           enabled: true,
-          easing: 'easeInOutCubic',
-          speed: 800
+          easing: 'easeinout',
+          speed: 400,
+          animateGradually: {
+            enabled: false
+          },
+          dynamicAnimation: {
+            enabled: false, /* Disable animation on data updates to prevent wiggle */
+            speed: 350
+          }
         }
       },
       plotOptions: {
         bar: {
           distributed: true,
-          borderRadius: 4,
+          borderRadius: 0,
+          horizontal: false,
           dataLabels: {
             position: 'top'
           }
@@ -76,6 +93,7 @@ export default function BenchmarkDataDisplay({ metricName, metricLabel, metricDe
         }
       },
       yaxis: {
+        max: yAxisMax, /* Dynamic max with headroom for labels */
         labels: {
           style: {
             fontSize: '12px',
@@ -88,7 +106,7 @@ export default function BenchmarkDataDisplay({ metricName, metricLabel, metricDe
       },
       dataLabels: {
         enabled: true,
-        offsetY: -20,
+        offsetY: -28, /* Position 0.5 text height (8px) above bar */
         style: {
           fontSize: '16px',
           fontFamily: 'Saans-TRIAL, -apple-system, BlinkMacSystemFont, sans-serif',
@@ -134,8 +152,90 @@ export default function BenchmarkDataDisplay({ metricName, metricLabel, metricDe
         }
       }
     };
-  }, [chartData, metricLabel, metricName, format]);
+  }, [chartData, metricLabel, metricName, format, chartId]);
 
+  // Callback when chart is ready - MUST be before any conditional returns
+  const handleChartReady = React.useCallback((chartInstance) => {
+    console.log('Chart ready:', chartInstance);
+    chartInstanceRef.current = chartInstance;
+  }, []);
+
+  // Expose download methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    download: (downloadFormat) => {
+      console.log('Download called with format:', downloadFormat);
+      console.log('Chart instance:', chartInstanceRef.current);
+
+      const chart = chartInstanceRef.current;
+
+      if (chart) {
+        switch (downloadFormat) {
+          case 'SVG':
+            console.log('Downloading SVG...');
+            // Clear any selection/active states before export
+            try {
+              chart.hideSeries(); // Hide all series first
+              chart.showSeries(); // Show them all again to reset state
+            } catch (e) {
+              // Ignore if methods don't exist
+            }
+
+            // Use paper() method for SVG export which is more reliable
+            try {
+              const svgData = chart.paper().svg();
+              // Clean up the SVG - remove any unwanted elements
+              const cleanedSvg = svgData
+                .replace(/class="apexcharts-selection-rect"/g, 'class="apexcharts-selection-rect" style="display:none"')
+                .replace(/class="apexcharts-xcrosshairs"/g, 'class="apexcharts-xcrosshairs" style="display:none"')
+                .replace(/class="apexcharts-ycrosshairs"/g, 'class="apexcharts-ycrosshairs" style="display:none"');
+
+              const blob = new Blob([cleanedSvg], { type: 'image/svg+xml' });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `${metricName}-benchmark.svg`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);
+            } catch (err) {
+              console.error('SVG download error:', err);
+            }
+            break;
+          case 'PNG':
+            console.log('Downloading PNG...');
+            chart.dataURI().then(({ imgURI }) => {
+              const link = document.createElement('a');
+              link.href = imgURI;
+              link.download = `${metricName}-benchmark.png`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }).catch(err => console.error('PNG download error:', err));
+            break;
+          case 'CSV':
+            console.log('Downloading CSV...');
+            // Create CSV from chart data
+            const csvData = chartData.map(d => `${d.label},${d.value}`).join('\n');
+            const csv = `Percentile,Value\n${csvData}`;
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${metricName}-benchmark.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            break;
+        }
+      } else {
+        console.error('Chart instance not available yet');
+      }
+    }
+  }), [metricName, chartData]);
+
+  // Early return AFTER all hooks are called
   if (!chartData) {
     return (
       <div className="benchmark-data-display-chart">
@@ -164,48 +264,6 @@ export default function BenchmarkDataDisplay({ metricName, metricLabel, metricDe
     );
   }
 
-  // Download handlers
-  const handleDownload = (format) => {
-    if (chartRef.current && chartRef.current.chart) {
-      const chart = chartRef.current.chart;
-
-      switch (format) {
-        case 'SVG':
-          chart.dataURI().then(({ imgURI }) => {
-            const link = document.createElement('a');
-            link.href = imgURI;
-            link.download = `${metricName}-benchmark.svg`;
-            link.click();
-          });
-          break;
-        case 'PNG':
-          chart.dataURI().then(({ imgURI }) => {
-            const link = document.createElement('a');
-            link.href = imgURI;
-            link.download = `${metricName}-benchmark.png`;
-            link.click();
-          });
-          break;
-        case 'CSV':
-          // Create CSV from chart data
-          const csvData = chartData.map(d => `${d.label},${d.value}`).join('\n');
-          const csv = `Percentile,Value\n${csvData}`;
-          const blob = new Blob([csv], { type: 'text/csv' });
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `${metricName}-benchmark.csv`;
-          link.click();
-          URL.revokeObjectURL(url);
-          break;
-      }
-
-      if (onDownloadMenuToggle) {
-        onDownloadMenuToggle(false);
-      }
-    }
-  };
-
   return (
     <div className="benchmark-data-display-chart">
       {/* Metric Header */}
@@ -216,41 +274,23 @@ export default function BenchmarkDataDisplay({ metricName, metricLabel, metricDe
             <p className="metric-description-chart">{metricDescription}</p>
           )}
         </div>
-
-        {/* Download Menu Dropdown */}
-        {onDownloadMenuToggle && (
-          <div className="download-dropdown-container-inline">
-            {showDownloadMenu && (
-              <>
-                <div className="download-menu-backdrop" onClick={() => onDownloadMenuToggle(false)}></div>
-                <div className="download-menu">
-                  <div className="download-menu-header">File Format</div>
-                  <button className="download-menu-item" onClick={() => handleDownload('SVG')}>
-                    SVG
-                  </button>
-                  <button className="download-menu-item" onClick={() => handleDownload('PNG')}>
-                    PNG
-                  </button>
-                  <button className="download-menu-item" onClick={() => handleDownload('CSV')}>
-                    CSV
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
       </div>
 
       {/* ApexCharts Bar Chart */}
       <div className="bar-chart-container">
         <ClientChart
-          ref={chartRef}
+          key={`${metricName}-${JSON.stringify(filters)}`} /* Force remount on filter change */
           options={chartOptions}
           series={chartOptions.series}
           type="bar"
           height={450}
+          onChartReady={handleChartReady}
         />
       </div>
     </div>
   );
-}
+});
+
+BenchmarkDataDisplay.displayName = 'BenchmarkDataDisplay';
+
+export default BenchmarkDataDisplay;

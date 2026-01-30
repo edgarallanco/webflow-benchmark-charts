@@ -957,16 +957,6 @@ h3.chart-title {
   height: 36px;
 }
 
-.filters-button::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 2px;
-  height: 2px;
-  background: #00c756;
-}
-
 .filters-button:hover {
   background: #cec6b6;
 }
@@ -989,58 +979,29 @@ h3.chart-title {
 /* Filters Overlay - Constrained to graph area */
 .filters-overlay-backdrop-constrained {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0; /* Fill the inner wrapper edge-to-edge */
   background: rgba(0, 0, 0, 0.3);
   z-index: 100;
   animation: fadeIn 0.2s ease;
   backdrop-filter: blur(2px);
-  border-radius: 12px;
+  border-radius: 8px;
 }
 
 .filters-overlay-panel-constrained {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0; /* Fill the inner wrapper edge-to-edge */
   z-index: 101;
-  max-width: calc(100% - 64px);
-  max-height: calc(100% - 64px);
-  overflow-y: auto;
+  overflow: hidden; /* No scroll on panel - scroll is on grid */
   animation: slideInConstrained 0.3s ease;
-  /* Scrollbar styling */
-  scrollbar-width: thin;
-  scrollbar-color: #cec6b6 #f7f5f2;
-}
-
-.filters-overlay-panel-constrained::-webkit-scrollbar {
-  width: 8px;
-}
-
-.filters-overlay-panel-constrained::-webkit-scrollbar-track {
-  background: #f7f5f2;
-  border-radius: 4px;
-}
-
-.filters-overlay-panel-constrained::-webkit-scrollbar-thumb {
-  background: #cec6b6;
-  border-radius: 4px;
-}
-
-.filters-overlay-panel-constrained::-webkit-scrollbar-thumb:hover {
-  background: #9d917a;
+  border-radius: 8px;
 }
 
 @keyframes slideInConstrained {
   from {
     opacity: 0;
-    transform: translate(-50%, -48%) scale(0.96);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
   }
 }
 
@@ -1113,12 +1074,20 @@ h3.chart-title {
 /* Benchmark Filters Panel */
 .benchmark-filters-panel {
   padding: 32px;
+  padding-bottom: 0; /* Remove bottom padding - actions will handle it */
   background: white;
-  border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  min-width: 700px;
-  max-width: 1000px;
-  width: auto;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* When inside constrained overlay, no border radius or shadow (edge-to-edge) */
+.filters-overlay-panel-constrained .benchmark-filters-panel {
+  border-radius: 0;
+  box-shadow: none;
 }
 
 /* Old Benchmark Filters (keep for backwards compatibility) */
@@ -1169,7 +1138,31 @@ h3.chart-title {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 32px 24px;
-  margin-bottom: 32px;
+  flex: 1;
+  align-content: start;
+  overflow-y: auto;
+  padding-bottom: 100px; /* Space for sticky footer */
+  /* Scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: #cec6b6 #f7f5f2;
+}
+
+.filters-panel-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.filters-panel-grid::-webkit-scrollbar-track {
+  background: #f7f5f2;
+  border-radius: 4px;
+}
+
+.filters-panel-grid::-webkit-scrollbar-thumb {
+  background: #cec6b6;
+  border-radius: 4px;
+}
+
+.filters-panel-grid::-webkit-scrollbar-thumb:hover {
+  background: #9d917a;
 }
 
 /* Old Filters Grid */
@@ -1333,13 +1326,21 @@ h3.chart-title {
   color: #20211b;
 }
 
-/* Filter Panel Actions */
+/* Filter Panel Actions - Sticky Footer */
 .filters-panel-actions {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding-top: 24px;
+  padding: 24px 32px 32px 32px; /* Padding aligns with parent container edge */
+  margin-right: 33px; /* Offset from right edge on desktop */
   border-top: 1px solid #e6e1d6;
+  background: white;
+  z-index: 10;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .filter-clear-button,
@@ -1694,11 +1695,20 @@ h3.chart-title {
   padding: 48px;
   min-height: 500px;
   box-shadow: none;
-  position: relative;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   flex: 1;
+}
+
+/* Inner wrapper for filter positioning */
+.survey-data-inner {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* This clips the absolutely positioned filters */
+  border-radius: 8px; /* Slight radius for inner area */
+  min-height: 600px; /* Ensure enough vertical space for filters */
 }
 
 /* Data Content Area */
@@ -1709,12 +1719,102 @@ h3.chart-title {
   min-height: 0;
 }
 
+/* Bottom Bar with Filter Pills + Download */
+.survey-bottom-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Filter Pills Container */
+.filter-pills-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 0;
+  /* Hide scrollbar but keep functionality */
+  scrollbar-width: thin;
+  scrollbar-color: #cec6b6 transparent;
+}
+
+.filter-pills-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.filter-pills-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filter-pills-container::-webkit-scrollbar-thumb {
+  background: #cec6b6;
+  border-radius: 3px;
+}
+
+.filter-pills-container::-webkit-scrollbar-thumb:hover {
+  background: #9d917a;
+}
+
+/* Individual Filter Pill */
+.filter-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 12px;
+  background: #e6e1d6;
+  border: 1px solid #cec6b6;
+  border-radius: 16px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.filter-pill:hover {
+  background: #d6d1c6;
+  border-color: #9d917a;
+}
+
+.filter-pill-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #20211b;
+  font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.filter-pill-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #504b41;
+  transition: all 0.2s ease;
+}
+
+.filter-pill-remove:hover {
+  background: #9d917a;
+  color: white;
+}
+
+.filter-pill-remove svg {
+  display: block;
+}
+
 /* Download Section Bottom */
 .survey-download-section-bottom {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   position: relative;
+  flex-shrink: 0;
 }
 
 /* Download Dropdown Inline (in chart header) */
@@ -1901,11 +2001,12 @@ h3.chart-title {
     padding: 24px 16px;
   }
 
-  .filters-overlay-panel-constrained {
-    max-width: calc(100% - 32px);
-    max-height: calc(100% - 32px);
-    width: calc(100% - 32px);
+  /* Remove right margin on mobile */
+  .filters-panel-actions {
+    margin-right: 0;
   }
+
+  /* No need to override overlay positioning on mobile - inset: 0 works everywhere */
 
   .benchmark-filters-panel {
     min-width: auto;
@@ -2051,16 +2152,6 @@ h3.chart-title {
   height: 48px;
 }
 
-.download-button::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 2px;
-  height: 2px;
-  background: #00c756;
-}
-
 .download-button:hover {
   background: #cec6b6;
 }
@@ -2133,10 +2224,6 @@ h3.chart-title {
 
 .download-menu-item:hover {
   background: #f7f5f2;
-}
-
-.download-button svg {
-  transform: rotate(180deg);
 }
 
 /* Hide old table styles but keep for backwards compatibility */

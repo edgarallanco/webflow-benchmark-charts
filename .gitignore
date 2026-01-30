@@ -31,3 +31,7 @@ pnpm-debug.log*
 
 # Webflow
 .webflow/
+reference/*
+.gitignore
+.claude/settings.local.json
+

@@ -1,9 +1,9 @@
 // Real Benchmark Data
-// Extracted from Scale VP benchmark survey (175+ companies)
-// Source: https://www.scalevp.com/benchmark-survey/
-// Data format: metric name -> filter combinations -> percentiles (p10, p25, p50, p75, p90, mean)
+// Extracted from Scale VP benchmark survey (175 companies)
+// Source: Database export from production
+// Dynamically computes statistics from raw survey responses based on filters
 
-import FILTERED_DATA from './benchmarkDataFiltered.json';
+import { computeBenchmarkStatistics } from './benchmarkDataProcessor.js';
 
 // Baseline data (no filters applied) for backwards compatibility
 export const MOCK_BENCHMARK_DATA = {
@@ -249,54 +249,17 @@ export const MOCK_BENCHMARK_DATA = {
   }
 };
 
-// Helper function to generate consistent filter key for lookup
-function createFilterKey(filters) {
-  if (!filters || Object.keys(filters).length === 0) {
-    return '{}';
-  }
-
-  // Sort keys alphabetically and create consistent JSON string
-  const sortedFilters = {};
-  Object.keys(filters)
-    .sort()
-    .forEach(key => {
-      sortedFilters[key] = filters[key];
-    });
-
-  return JSON.stringify(sortedFilters);
-}
-
 // Helper function to get benchmark data for a specific metric with filters
 export function getBenchmarkData(metricName, filters = {}) {
-  // Check if metric exists in filtered data
-  const metricData = FILTERED_DATA[metricName];
+  // Compute statistics dynamically from raw data
+  const statistics = computeBenchmarkStatistics(metricName, filters);
 
-  if (!metricData) {
-    console.warn(`Metric "${metricName}" not found in benchmark data`);
+  if (!statistics) {
+    console.warn(`No data available for metric "${metricName}" with filters:`, filters);
     return null;
   }
 
-  // Generate filter key to match the JSON structure
-  const filterKey = createFilterKey(filters);
-
-  // Look up the data for this filter combination
-  const filterResult = metricData[filterKey];
-
-  if (!filterResult) {
-    console.warn(`No data found for metric "${metricName}" with filter key:`, filterKey);
-    console.info('Available filter keys for this metric:', Object.keys(metricData).slice(0, 5));
-    return null;
-  }
-
-  // Check if percentiles is empty (no data for this filter combination)
-  if (!filterResult.percentiles ||
-      Array.isArray(filterResult.percentiles) ||
-      Object.keys(filterResult.percentiles).length === 0) {
-    console.info(`No benchmark data available for "${metricName}" with filters:`, filterResult.label);
-    return null;
-  }
-
-  return filterResult.percentiles;
+  return statistics;
 }
 
 // Format value based on metric format type (for display)
@@ -333,25 +296,11 @@ export function getChartData(metricName, filters = {}) {
   ];
 }
 
-// Get all available filter combinations for a metric (useful for debugging)
-export function getAvailableFilters(metricName) {
-  const metricData = FILTERED_DATA[metricName];
-
-  if (!metricData) {
-    return [];
-  }
-
-  // Return all filter combinations that have valid data
-  return Object.entries(metricData)
-    .filter(([key, result]) => {
-      return result.percentiles &&
-             !Array.isArray(result.percentiles) &&
-             Object.keys(result.percentiles).length > 0;
-    })
-    .map(([key, result]) => ({
-      filterKey: key,
-      filters: result.filters,
-      label: result.label,
-      sampleData: `p50=${result.percentiles.p50}`
-    }));
+// Get data coverage info (useful for debugging)
+export function getDataCoverage() {
+  return {
+    totalRecords: 175,
+    source: 'Database export - 2026-01-13',
+    computationMethod: 'Dynamic statistics from raw survey responses'
+  };
 }
