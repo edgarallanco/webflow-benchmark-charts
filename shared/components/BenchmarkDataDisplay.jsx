@@ -18,11 +18,22 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
     const values = chartData.map(d => d.value);
     const colors = chartData.map(d => d.type === 'mean' ? '#00c756' : '#9d917a');
 
-    // Calculate max value and add headroom for labels
+    // Calculate min/max values and add headroom for labels
+    const minValue = Math.min(...values);
     const maxValue = Math.max(...values);
-    const yAxisMax = format === 'percentage'
-      ? Math.ceil(maxValue / 10) * 10 + 20  // Round up to nearest 10 and add 20 units headroom
-      : undefined;
+
+    // Determine Y-axis bounds based on data
+    let yAxisMin, yAxisMax;
+
+    if (format === 'percentage') {
+      // For percentages, start at 0 or below if there are negative values
+      yAxisMin = minValue < 0 ? Math.floor(minValue / 10) * 10 - 10 : 0;
+      yAxisMax = Math.ceil(maxValue / 10) * 10 + 20; // Round up to nearest 10 and add 20 units headroom
+    } else {
+      // For other formats, use similar logic
+      yAxisMin = minValue < 0 ? Math.floor(minValue * 0.9) : 0;
+      yAxisMax = Math.ceil(maxValue * 1.2);
+    }
 
     return {
       chart: {
@@ -60,6 +71,31 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
           }
         }
       },
+      annotations: minValue < 0 ? {
+        yaxis: [
+          {
+            y: 0,
+            borderColor: '#20211b',
+            strokeDashArray: 0,
+            borderWidth: 2,
+            opacity: 0.8,
+            label: {
+              borderColor: '#20211b',
+              style: {
+                color: '#fff',
+                background: '#20211b',
+                fontSize: '11px',
+                fontWeight: 500,
+                fontFamily: 'Saans-TRIAL, -apple-system, BlinkMacSystemFont, sans-serif'
+              },
+              text: '0% baseline',
+              position: 'left',
+              offsetX: 0,
+              offsetY: 0
+            }
+          }
+        ]
+      } : undefined,
       plotOptions: {
         bar: {
           distributed: true,
@@ -93,6 +129,7 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
         }
       },
       yaxis: {
+        min: yAxisMin, /* Start at 0 or below for negative values */
         max: yAxisMax, /* Dynamic max with headroom for labels */
         labels: {
           style: {
@@ -119,6 +156,7 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
         }
       },
       tooltip: {
+        enabled: true,
         theme: 'light',
         style: {
           fontSize: '12px',
@@ -126,7 +164,15 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
         },
         y: {
           formatter: (value) => formatValue(value, format)
-        }
+        },
+        fixed: {
+          enabled: false,
+          position: 'topRight'
+        },
+        followCursor: false,
+        intersect: true,
+        inverseOrder: false,
+        custom: undefined
       },
       legend: {
         show: false

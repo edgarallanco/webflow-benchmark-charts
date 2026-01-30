@@ -6,6 +6,8 @@ import React, { useEffect, useState } from 'react';
  */
 export default function ClientChart({ options, series, type, height, onChartReady }) {
   const [Chart, setChart] = useState(null);
+  const [isReady, setIsReady] = useState(false);
+  const containerRef = React.useRef(null);
 
   useEffect(() => {
     // Only import ApexCharts on the client side
@@ -13,6 +15,18 @@ export default function ClientChart({ options, series, type, height, onChartRead
       setChart(() => mod.default);
     });
   }, []);
+
+  // Wait for container to be sized before rendering chart
+  useEffect(() => {
+    if (!Chart) return;
+
+    // Small delay to ensure container is fully rendered and sized
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, [Chart]);
 
   // Use chart events to get the instance when it's ready
   const chartOptions = React.useMemo(() => {
@@ -35,9 +49,20 @@ export default function ClientChart({ options, series, type, height, onChartRead
     };
   }, [options, onChartReady]);
 
-  if (!Chart) {
-    return <div style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading chart...</div>;
+  if (!Chart || !isReady) {
+    return (
+      <div
+        ref={containerRef}
+        style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
+        Loading chart...
+      </div>
+    );
   }
 
-  return <Chart options={chartOptions} series={series} type={type} height={height} />;
+  return (
+    <div ref={containerRef} style={{ position: 'relative', width: '100%', height }}>
+      <Chart options={chartOptions} series={series} type={type} height={height} />
+    </div>
+  );
 }
