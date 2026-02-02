@@ -24,6 +24,14 @@ export function buildChartOptions(chartConfig, metricKey, revenueSetup = 'all', 
 
   // Base options
   const options = {
+    fill: {
+      type: 'solid',
+      image: {
+        src: [],
+        width: undefined,
+        height: undefined
+      }
+    },
     chart: {
       type: chartConfig.type,
       toolbar: {

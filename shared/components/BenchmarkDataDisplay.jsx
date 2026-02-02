@@ -36,9 +36,19 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
     }
 
     return {
+      fill: {
+        type: 'solid',
+        image: {
+          src: [],
+          width: undefined,
+          height: undefined
+        }
+      },
       chart: {
         id: chartId,
         type: 'bar',
+        height: 450,
+        width: '100%',
         toolbar: {
           show: false,
           export: {
@@ -69,7 +79,9 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
             enabled: false, /* Disable animation on data updates to prevent wiggle */
             speed: 350
           }
-        }
+        },
+        redrawOnParentResize: false,
+        redrawOnWindowResize: false
       },
       annotations: minValue < 0 ? {
         yaxis: [
@@ -94,8 +106,9 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
               offsetY: 0
             }
           }
-        ]
-      } : undefined,
+        ],
+        images: []
+      } : { images: [] },
       plotOptions: {
         bar: {
           distributed: true,
@@ -155,9 +168,21 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
           enabled: false
         }
       },
+      markers: {
+        size: 0,
+        hover: {
+          size: 0,
+          sizeOffset: 0
+        }
+      },
       tooltip: {
         enabled: true,
+        shared: false,
+        followCursor: false,
+        intersect: true,
         theme: 'light',
+        offsetX: 0,
+        offsetY: -10,
         style: {
           fontSize: '12px',
           fontFamily: 'Saans-TRIAL, -apple-system, BlinkMacSystemFont, sans-serif'
@@ -165,14 +190,9 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
         y: {
           formatter: (value) => formatValue(value, format)
         },
-        fixed: {
-          enabled: false,
-          position: 'topRight'
-        },
-        followCursor: false,
-        intersect: true,
-        inverseOrder: false,
-        custom: undefined
+        marker: {
+          show: false
+        }
       },
       legend: {
         show: false
@@ -324,14 +344,16 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
 
       {/* ApexCharts Bar Chart */}
       <div className="bar-chart-container">
-        <ClientChart
-          key={`${metricName}-${JSON.stringify(filters)}`} /* Force remount on filter change */
-          options={chartOptions}
-          series={chartOptions.series}
-          type="bar"
-          height={450}
-          onChartReady={handleChartReady}
-        />
+        <div className="bar-chart-wrapper" style={{ position: 'relative', width: '100%', height: '450px' }}>
+          <ClientChart
+            key={`${metricName}-${JSON.stringify(filters)}`} /* Force remount on filter change */
+            options={chartOptions}
+            series={chartOptions.series}
+            type="bar"
+            height={450}
+            onChartReady={handleChartReady}
+          />
+        </div>
       </div>
     </div>
   );

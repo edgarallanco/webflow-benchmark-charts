@@ -56,7 +56,7 @@ export default function BenchmarkSurveyLayout({ className = '', children }) {
         <div className="survey-header-bar">
           <h2 className="survey-section-title">Choose Your Benchmark</h2>
           <button
-            className={`filters-button ${showFilters ? 'active' : ''}`}
+            className={`filters-button filters-button-desktop ${showFilters ? 'active' : ''}`}
             onClick={() => setShowFilters(!showFilters)}
           >
             <span>Filters</span>
@@ -93,6 +93,17 @@ export default function BenchmarkSurveyLayout({ className = '', children }) {
           />
         </div>
 
+        {/* Mobile Filters Button - Shows below sidebar on mobile */}
+        <button
+          className={`filters-button filters-button-mobile ${showFilters ? 'active' : ''}`}
+          onClick={() => setShowFilters(!showFilters)}
+        >
+          <span>Filters</span>
+          <svg width="12" height="8" viewBox="0 0 12 8" fill="none" className={showFilters ? 'rotated' : ''}>
+            <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+
         {/* Main Area */}
         <div className="survey-main-full">
           {/* Data Display Area */}
@@ -113,6 +124,40 @@ export default function BenchmarkSurveyLayout({ className = '', children }) {
                     />
                   </div>
                 </>
+              )}
+
+              {/* Active Filter Pills - Above chart */}
+              {Object.keys(filters).some(key => filters[key] && filters[key].length > 0) && (
+                <div className="filter-pills-container filter-pills-top">
+                  {Object.entries(filters).map(([filterKey, values]) => {
+                    if (!values || values.length === 0) return null;
+                    return values.map((value, index) => (
+                      <div key={`${filterKey}-${index}`} className="filter-pill">
+                        <span className="filter-pill-text">{value}</span>
+                        <button
+                          className="filter-pill-remove"
+                          onClick={() => {
+                            const newValues = values.filter(v => v !== value);
+                            setFilters({
+                              ...filters,
+                              [filterKey]: newValues.length > 0 ? newValues : undefined
+                            });
+                          }}
+                          aria-label={`Remove ${value} filter`}
+                        >
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                            <path
+                              d="M9 3L3 9M3 3L9 9"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    ));
+                  })}
+                </div>
               )}
 
               {/* Data Content */}
@@ -158,40 +203,8 @@ export default function BenchmarkSurveyLayout({ className = '', children }) {
             </div>
           </div>
 
-          {/* Filter Pills + Download Button - Bottom Bar */}
+          {/* Download Button - Bottom Bar */}
           <div className="survey-bottom-bar">
-            {/* Active Filter Pills */}
-            <div className="filter-pills-container">
-              {Object.entries(filters).map(([filterKey, values]) => {
-                if (!values || values.length === 0) return null;
-                return values.map((value, index) => (
-                  <div key={`${filterKey}-${index}`} className="filter-pill">
-                    <span className="filter-pill-text">{value}</span>
-                    <button
-                      className="filter-pill-remove"
-                      onClick={() => {
-                        const newValues = values.filter(v => v !== value);
-                        setFilters({
-                          ...filters,
-                          [filterKey]: newValues.length > 0 ? newValues : undefined
-                        });
-                      }}
-                      aria-label={`Remove ${value} filter`}
-                    >
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                        <path
-                          d="M9 3L3 9M3 3L9 9"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                ));
-              })}
-            </div>
-
             {/* Download Button */}
             <div className="survey-download-section-bottom">
               <button

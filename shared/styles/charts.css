@@ -1,3 +1,13 @@
+/* Universal box-sizing for all chart components */
+.benchmark-charts,
+.benchmark-charts *,
+.benchmark-charts-layout,
+.benchmark-charts-layout *,
+.benchmark-survey-layout,
+.benchmark-survey-layout * {
+  box-sizing: border-box;
+}
+
 /* Benchmark Charts Styles */
 
 .benchmark-charts {
@@ -6,6 +16,7 @@
   padding: 40px 20px;
   font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   background: #f7f5f2;
+  box-sizing: border-box;
 }
 
 .benchmark-charts .layout-revenue-selector {
@@ -97,6 +108,8 @@
   gap: 32px;
   position: relative; /* Positioning context for expanded charts */
   min-height: 600px; /* Ensure grid has height for absolute positioning */
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .chart-section {
@@ -115,6 +128,7 @@
   width: 100%;
   height: auto;
   box-sizing: border-box;
+  min-width: 0; /* Allow flex/grid children to shrink below content size */
 }
 
 .benchmark-chart:not(.expanded) {
@@ -567,6 +581,7 @@ h3.chart-title {
   margin: 0 auto;
   padding: 40px 20px;
   background: #f7f5f2;
+  box-sizing: border-box;
 }
 
 /* Subtle Divider at top */
@@ -700,6 +715,8 @@ h3.chart-title {
   gap: 32px;
   position: relative; /* Positioning context for expanded charts */
   min-height: 600px; /* Ensure grid has height for absolute positioning */
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .benchmark-charts-layout .chart-item {
@@ -891,6 +908,8 @@ h3.chart-title {
   gap: 32px;
   position: relative;
   height: 100%;
+  box-sizing: border-box;
+  min-width: 0; /* Allow grid to shrink */
 }
 
 /* Mobile Filter Toggle - Hidden */
@@ -950,6 +969,11 @@ h3.chart-title {
   font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   position: relative;
   height: 36px;
+}
+
+/* Hide mobile filters button on desktop */
+.filters-button-mobile {
+  display: none;
 }
 
 .filters-button:hover {
@@ -1331,7 +1355,6 @@ h3.chart-title {
   justify-content: flex-end;
   gap: 12px;
   padding: 24px 32px 32px 32px; /* Padding aligns with parent container edge */
-  margin-right: 33px; /* Offset from right edge on desktop */
   border-top: 1px solid #e6e1d6;
   background: white;
   z-index: 10;
@@ -1680,7 +1703,9 @@ h3.chart-title {
   flex-direction: column;
   gap: 24px;
   min-height: 0;
+  min-width: 0; /* Allow flex child to shrink */
   flex: 1;
+  box-sizing: border-box;
 }
 
 /* Survey Data Area Full (without tabs) */
@@ -1693,6 +1718,9 @@ h3.chart-title {
   display: flex;
   flex-direction: column;
   flex: 1;
+  box-sizing: border-box;
+  min-width: 0; /* Allow flex child to shrink */
+  overflow: hidden; /* Prevent content overflow */
 }
 
 /* Inner wrapper for filter positioning */
@@ -1715,12 +1743,14 @@ h3.chart-title {
   min-height: 0;
 }
 
-/* Bottom Bar with Filter Pills + Download */
+/* Bottom Bar with Download Button */
 .survey-bottom-bar {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 16px;
   width: 100%;
+  margin-top: 24px;
 }
 
 /* Filter Pills Container */
@@ -1735,6 +1765,13 @@ h3.chart-title {
   /* Hide scrollbar but keep functionality */
   scrollbar-width: thin;
   scrollbar-color: #cec6b6 transparent;
+}
+
+/* Filter Pills at Top (above chart) */
+.filter-pills-top {
+  flex: none;
+  margin-bottom: 24px;
+  padding: 12px 0;
 }
 
 .filter-pills-container::-webkit-scrollbar {
@@ -1927,9 +1964,17 @@ h3.chart-title {
     font-size: 20px;
   }
 
-  .filters-button {
+  /* Hide desktop filters button on mobile */
+  .filters-button-desktop {
+    display: none !important;
+  }
+
+  /* Show mobile filters button below sidebar */
+  .filters-button-mobile {
+    display: flex;
     width: 100%;
     justify-content: center;
+    margin-bottom: 20px;
   }
 
   /* Keep mobile filter toggle hidden */
@@ -2039,6 +2084,17 @@ h3.chart-title {
   .placeholder-text {
     font-size: 14px;
   }
+
+  /* Filter pills styling at top on mobile */
+  .filter-pills-top {
+    padding: 8px 0;
+    margin-bottom: 16px;
+  }
+
+  /* Bottom bar on mobile - hide download button */
+  .survey-bottom-bar {
+    display: none;
+  }
 }
 
 /* ========================================
@@ -2051,6 +2107,8 @@ h3.chart-title {
   display: flex;
   flex-direction: column;
   animation: fadeIn 0.3s ease;
+  box-sizing: border-box;
+  min-width: 0; /* Allow flex child to shrink */
 }
 
 .metric-header-chart {
@@ -2114,28 +2172,21 @@ h3.chart-title {
 
 /* Bar Chart */
 .bar-chart-container {
-  position: relative; /* Establishes positioning context for tooltips */
   flex: 1;
   padding: 20px 0;
-  min-height: 400px; /* Prevent flex shrinking issues */
-  isolation: isolate; /* Creates stacking context */
+  min-height: 0;
+  box-sizing: border-box;
+  min-width: 0; /* Allow flex child to shrink */
+}
+
+.bar-chart-wrapper {
+  isolation: isolate; /* Create stacking context */
+  contain: layout; /* Optimize layout containment */
 }
 
 .bar-chart-container svg {
   max-width: 100%;
   height: auto;
-}
-
-/* ApexCharts Tooltip Positioning Fix */
-.bar-chart-container .apexcharts-tooltip {
-  position: absolute !important;
-  pointer-events: none;
-  z-index: 12;
-}
-
-.bar-chart-container .apexcharts-xcrosshairs,
-.bar-chart-container .apexcharts-ycrosshairs {
-  pointer-events: none;
 }
 
 /* Chart Actions */
