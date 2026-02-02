@@ -2490,15 +2490,13 @@ h3.chart-title {
   }
 
   .filters-panel-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
 
   .benchmark-filters-panel {
     padding: 24px 20px;
     min-width: auto;
-    max-width: 95vw;
-    width: 95vw;
   }
 
   .filters-overlay-panel {

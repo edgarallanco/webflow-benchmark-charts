@@ -28,7 +28,18 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
     if (format === 'percentage') {
       // For percentages, start at 0 or below if there are negative values
       yAxisMin = minValue < 0 ? Math.floor(minValue / 10) * 10 - 10 : 0;
-      yAxisMax = Math.ceil(maxValue / 10) * 10 + 20; // Round up to nearest 10 and add 20 units headroom
+
+      // Smart scaling based on magnitude of values
+      if (maxValue < 1) {
+        // For small decimals (< 1), add 20% headroom
+        yAxisMax = Math.ceil(maxValue * 1.2 * 100) / 100;
+      } else if (maxValue < 10) {
+        // For values < 10, round to nearest 1 and add 2 units headroom
+        yAxisMax = Math.ceil(maxValue) + 2;
+      } else {
+        // For larger values, round to nearest 10 and add 20 units headroom
+        yAxisMax = Math.ceil(maxValue / 10) * 10 + 20;
+      }
     } else {
       // For other formats, use similar logic
       yAxisMin = minValue < 0 ? Math.floor(minValue * 0.9) : 0;

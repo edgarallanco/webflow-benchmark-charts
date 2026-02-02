@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
  */
 export default function ClientChart({ options, series, type, height, onChartReady }) {
   const [Chart, setChart] = useState(null);
+  const [key, setKey] = useState(0);
   const chartRef = React.useRef(null);
 
   useEffect(() => {
@@ -13,6 +14,28 @@ export default function ClientChart({ options, series, type, height, onChartRead
     import('react-apexcharts').then((mod) => {
       setChart(() => mod.default);
     });
+  }, []);
+
+  // Handle window resize with debounce
+  useEffect(() => {
+    let resizeTimer;
+
+    const handleResize = () => {
+      // Clear existing timer
+      clearTimeout(resizeTimer);
+
+      // Set new timer to re-render chart after resize stops
+      resizeTimer = setTimeout(() => {
+        setKey(prev => prev + 1); // Force re-render
+      }, 250); // Wait 250ms after resize stops
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimer);
+    };
   }, []);
 
   // Cleanup on unmount
@@ -53,5 +76,5 @@ export default function ClientChart({ options, series, type, height, onChartRead
     return <div style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading chart...</div>;
   }
 
-  return <Chart options={chartOptions} series={series} type={type} height={height} />;
+  return <Chart key={key} options={chartOptions} series={series} type={type} height={height} />;
 }
