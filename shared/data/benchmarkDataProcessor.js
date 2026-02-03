@@ -107,12 +107,12 @@ function recordMatchesFilters(record, filters) {
       const matches = mappedValues.includes(recordValue);
       if (!matches) return false;
     }
-    // Special handling for customer segments - use boolean columns to match old behavior
-    // Check the boolean column directly (e.g., "Enterprise (> $1B)" column)
+    // Special handling for customer segments - check if segment appears in Primary Customer Target Segment field
     else if (filterKey === 'primary-customer-target-segment') {
+      const primarySegment = record[fieldName] || '';
       const matches = filterValues.some(fv => {
-        // Check the boolean column with the exact segment name
-        return record[fv] === 'TRUE';
+        // Check if the segment name appears anywhere in the Primary Customer Target Segment field
+        return primarySegment.includes(fv);
       });
       if (!matches) return false;
     }
@@ -204,4 +204,108 @@ export function getDataCoverage() {
     availableMetrics: Object.keys(METRIC_FIELD_MAP),
     availableFilters: Object.keys(FILTER_FIELD_MAP)
   };
+}
+
+// All filter options for each filter category
+const ALL_FILTER_OPTIONS = {
+  'growth-rate': ['<=10', '11-20', '21-30', '>30'],
+  'arr': [
+    'Less than $1M',
+    '$1M - $5M',
+    '$5M - $20M',
+    '$20M - $50M',
+    '$50M - $100M',
+    '$100M - $250M',
+    '$250M - $1B',
+    'More than $1B'
+  ],
+  'number-of-employees': [
+    'Less than 10',
+    '11 - 25',
+    '26 - 100',
+    '101 - 250',
+    '251 - 1,000',
+    '1,001 - 5,000',
+    '5,001 - 10,000',
+    'More than 10,000'
+  ],
+  'acv-last-12-months': [
+    'Less than $1K',
+    '$1K - $5K',
+    '$5K - $10K',
+    '$10K - $25K',
+    '$25K - $50K',
+    '$50K - $100K',
+    '$100K - $250K',
+    '$250K - $1M',
+    'More than $1M'
+  ],
+  'primary-pricing-model': [
+    'Hybrid (Subscription + Usage-based)',
+    'Usage-based',
+    'Subscription'
+  ],
+  'primary-customer-target-segment': [
+    'Mid-Market ($10M-$100M)',
+    'Commercial ($100M-$1B)',
+    'Enterprise (> $1B)'
+  ],
+  'primary-solution-type': [
+    'eCommerce',
+    'Horizontal app',
+    'Infrastructure',
+    'Security',
+    'Software with a hardware component',
+    'Vertical app'
+  ],
+  'incorporated-ai': ['Yes', 'No']
+};
+
+// Get disabled filter options based on current filters
+// Returns options that would result in <5 records if selected
+export function getDisabledFilterOptions(currentFilters) {
+  const disabled = {};
+
+  for (const [filterKey, fieldName] of Object.entries(FILTER_FIELD_MAP)) {
+    disabled[filterKey] = [];
+
+    // Get filters WITHOUT this category to see base matching set
+    const filtersWithoutThisCategory = { ...currentFilters };
+    delete filtersWithoutThisCategory[filterKey];
+
+    // Also remove empty arrays from the copy
+    for (const key of Object.keys(filtersWithoutThisCategory)) {
+      if (!filtersWithoutThisCategory[key] || filtersWithoutThisCategory[key].length === 0) {
+        delete filtersWithoutThisCategory[key];
+      }
+    }
+
+    const baseRecords = FULL_DATA.filter(r =>
+      recordMatchesFilters(r, filtersWithoutThisCategory)
+    );
+
+    // For each option, check if selecting it would give <5 records
+    for (const option of ALL_FILTER_OPTIONS[filterKey]) {
+      let count;
+
+      if (filterKey === 'primary-customer-target-segment') {
+        // Customer segments - check if segment appears in Primary Customer Target Segment field
+        count = baseRecords.filter(r => (r[fieldName] || '').includes(option)).length;
+      } else if (filterKey === 'growth-rate') {
+        // Growth rate needs value mapping
+        const valueMap = FILTER_VALUE_MAP['growth-rate'];
+        const mappedValue = valueMap[option];
+        count = baseRecords.filter(r => r[fieldName] === mappedValue).length;
+      } else {
+        // Direct string matching for other filters
+        count = baseRecords.filter(r => r[fieldName] === option).length;
+      }
+
+      if (count < 5) {
+        disabled[filterKey].push(option);
+      }
+    }
+  }
+
+  return disabled;
 }

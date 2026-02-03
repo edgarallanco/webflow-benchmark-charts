@@ -1345,6 +1345,16 @@ h3.chart-title {
   color: #20211b;
 }
 
+/* Disabled filter option styling */
+.filter-checkbox-option input:disabled + span {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.filter-checkbox-option input:disabled {
+  cursor: not-allowed;
+}
+
 /* Filter Panel Actions - Sticky Footer */
 .filters-panel-actions {
   position: absolute;

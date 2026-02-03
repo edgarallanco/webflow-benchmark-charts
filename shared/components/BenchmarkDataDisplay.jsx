@@ -23,7 +23,7 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
     const maxValue = Math.max(...values);
 
     // Determine Y-axis bounds based on data
-    let yAxisMin, yAxisMax;
+    let yAxisMin, yAxisMax, tickAmount;
 
     if (format === 'percentage') {
       // For percentages, start at 0 or below if there are negative values
@@ -33,17 +33,29 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
       if (maxValue < 1) {
         // For small decimals (< 1), add 20% headroom
         yAxisMax = Math.ceil(maxValue * 1.2 * 100) / 100;
+        tickAmount = 5;
       } else if (maxValue < 10) {
         // For values < 10, round to nearest 1 and add 2 units headroom
         yAxisMax = Math.ceil(maxValue) + 2;
+        tickAmount = Math.min(yAxisMax - yAxisMin, 6);
       } else {
-        // For larger values, round to nearest 10 and add 20 units headroom
-        yAxisMax = Math.ceil(maxValue / 10) * 10 + 20;
+        // For larger values, round to nearest 10 and add 10 units headroom
+        yAxisMax = Math.ceil(maxValue / 10) * 10 + 10;
+        // Calculate tick amount to get nice round numbers (aim for ~5-6 ticks)
+        const range = yAxisMax - yAxisMin;
+        if (range <= 50) {
+          tickAmount = range / 10; // Ticks every 10
+        } else if (range <= 100) {
+          tickAmount = range / 20; // Ticks every 20
+        } else {
+          tickAmount = 5; // Default to 5 ticks for large ranges
+        }
       }
     } else {
       // For other formats, use similar logic
       yAxisMin = minValue < 0 ? Math.floor(minValue * 0.9) : 0;
       yAxisMax = Math.ceil(maxValue * 1.2);
+      tickAmount = 5;
     }
 
     return {
@@ -153,8 +165,9 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
         }
       },
       yaxis: {
-        min: yAxisMin, /* Start at 0 or below for negative values */
-        max: yAxisMax, /* Dynamic max with headroom for labels */
+        min: yAxisMin,
+        max: yAxisMax,
+        tickAmount: tickAmount,
         labels: {
           style: {
             fontSize: '12px',

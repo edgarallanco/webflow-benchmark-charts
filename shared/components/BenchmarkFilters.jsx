@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { getDisabledFilterOptions } from '../data/benchmarkDataProcessor';
 
 // Filter options based on the reference HTML
 const FILTER_OPTIONS = {
@@ -84,6 +85,11 @@ const FILTER_OPTIONS = {
 export default function BenchmarkFilters({ filters, onFiltersChange, className = '' }) {
   const [localFilters, setLocalFilters] = useState(filters);
 
+  // Calculate disabled options based on current local filters
+  const disabledOptions = useMemo(() => {
+    return getDisabledFilterOptions(localFilters);
+  }, [localFilters]);
+
   const handleOptionToggle = (filterKey, option) => {
     const currentValues = localFilters[filterKey] || [];
     const newValues = currentValues.includes(option)
@@ -118,16 +124,20 @@ export default function BenchmarkFilters({ filters, onFiltersChange, className =
             <div key={filterKey} className="filter-column">
               <div className="filter-column-header">{config.label}</div>
               <div className="filter-column-options">
-                {config.options.map(option => (
-                  <label key={option} className="filter-checkbox-option">
-                    <input
-                      type="checkbox"
-                      checked={selectedValues.includes(option)}
-                      onChange={() => handleOptionToggle(filterKey, option)}
-                    />
-                    <span>{option}</span>
-                  </label>
-                ))}
+                {config.options.map(option => {
+                  const isDisabled = disabledOptions[filterKey]?.includes(option);
+                  return (
+                    <label key={option} className="filter-checkbox-option">
+                      <input
+                        type="checkbox"
+                        checked={selectedValues.includes(option)}
+                        onChange={() => handleOptionToggle(filterKey, option)}
+                        disabled={isDisabled}
+                      />
+                      <span>{option}</span>
+                    </label>
+                  );
+                })}
               </div>
             </div>
           );
