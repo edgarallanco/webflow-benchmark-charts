@@ -85,6 +85,11 @@ const FILTER_OPTIONS = {
 export default function BenchmarkFilters({ filters, onFiltersChange, className = '' }) {
   const [localFilters, setLocalFilters] = useState(filters);
 
+  // Sync localFilters when parent filters change (e.g., when pill is removed)
+  useEffect(() => {
+    setLocalFilters(filters);
+  }, [filters]);
+
   // Calculate disabled options based on current local filters
   const disabledOptions = useMemo(() => {
     return getDisabledFilterOptions(localFilters);
@@ -96,19 +101,20 @@ export default function BenchmarkFilters({ filters, onFiltersChange, className =
       ? currentValues.filter(v => v !== option)
       : [...currentValues, option];
 
-    setLocalFilters({
+    const newFilters = {
       ...localFilters,
       [filterKey]: newValues.length > 0 ? newValues : undefined
-    });
+    };
+
+    setLocalFilters(newFilters);
+    // Apply filters immediately when checkbox is toggled
+    onFiltersChange(newFilters);
   };
 
   const clearAllFilters = () => {
     setLocalFilters({});
-  };
-
-  const applyFilters = () => {
-    onFiltersChange(localFilters);
-    // Parent component will handle closing the overlay
+    // Apply empty filters immediately
+    onFiltersChange({});
   };
 
   const hasActiveFilters = Object.values(localFilters).some(arr => arr && arr.length > 0);
@@ -147,10 +153,7 @@ export default function BenchmarkFilters({ filters, onFiltersChange, className =
       {/* Action Buttons */}
       <div className="filters-panel-actions">
         <button className="filter-clear-button" onClick={clearAllFilters}>
-          Clear
-        </button>
-        <button className="filter-apply-button" onClick={applyFilters}>
-          Apply
+          Clear All Filters
         </button>
       </div>
     </div>

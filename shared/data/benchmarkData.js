@@ -286,6 +286,11 @@ export function getChartData(metricName, filters = {}) {
     return null;
   }
 
+  // Require minimum of 10 data points to display
+  if (data.sampleSize < 10) {
+    return null;
+  }
+
   return [
     { label: '10th Percentile', value: data.p10, type: 'percentile' },
     { label: '25th Percentile', value: data.p25, type: 'percentile' },

@@ -890,6 +890,36 @@ h3.chart-title {
   padding: 0;
   background: transparent;
   gap: 24px;
+  min-height: 44px; /* Reserve space to prevent layout shift */
+}
+
+
+/* Desktop Filters Row - contains pills + button */
+.filters-row-desktop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: 1;
+  max-width: 90%;
+  margin-left: auto;
+  min-height: 36px;
+}
+
+/* Filter pills in header (desktop) */
+.filter-pills-header {
+  display: contents; /* Pills flow directly into parent flex container */
+}
+
+/* Mobile Filters Row - hidden on desktop */
+.filters-row-mobile {
+  display: none;
+}
+
+/* Mobile Filter Pills - hidden on desktop */
+.filter-pills-mobile {
+  display: none;
 }
 
 .survey-section-title {
@@ -899,6 +929,7 @@ h3.chart-title {
   color: #20211b;
   font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   line-height: 1.3;
+  flex-shrink: 0;
 }
 
 /* Survey Content - Two Column Layout */
@@ -910,6 +941,7 @@ h3.chart-title {
   height: 100%;
   box-sizing: border-box;
   min-width: 0; /* Allow grid to shrink */
+  align-items: start; /* Prevent vertical shifting */
 }
 
 /* Mobile Filter Toggle - Hidden */
@@ -934,6 +966,8 @@ h3.chart-title {
   max-height: calc(100vh - 150px);
   overflow-y: auto;
   align-self: start;
+  will-change: transform; /* Optimize sticky positioning */
+  contain: layout; /* Isolate layout to prevent shift */
 }
 
 .benchmark-sidebar {
@@ -959,7 +993,7 @@ h3.chart-title {
   gap: 8px;
   padding: 8px 20px;
   background: #e6e1d6;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 8px;
   color: #20211b;
   font-size: 12px;
@@ -969,6 +1003,7 @@ h3.chart-title {
   font-family: 'Saans-TRIAL', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   position: relative;
   height: 36px;
+  box-sizing: border-box;
 }
 
 /* Hide mobile filters button on desktop */
@@ -1768,6 +1803,7 @@ h3.chart-title {
   flex: 1;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
   overflow-x: auto;
   overflow-y: hidden;
@@ -1777,12 +1813,6 @@ h3.chart-title {
   scrollbar-color: #cec6b6 transparent;
 }
 
-/* Filter Pills at Top (above chart) */
-.filter-pills-top {
-  flex: none;
-  margin-bottom: 24px;
-  padding: 12px 0;
-}
 
 .filter-pills-container::-webkit-scrollbar {
   height: 6px;
@@ -1806,13 +1836,15 @@ h3.chart-title {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 10px 6px 12px;
+  height: 36px;
+  padding: 0 10px 0 14px;
   background: #e6e1d6;
   border: 1px solid #cec6b6;
-  border-radius: 16px;
+  border-radius: 8px;
   white-space: nowrap;
   flex-shrink: 0;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .filter-pill:hover {
@@ -1974,17 +2006,36 @@ h3.chart-title {
     font-size: 20px;
   }
 
-  /* Hide desktop filters button on mobile */
+  /* Hide desktop filters row on mobile */
+  .filters-row-desktop {
+    display: none !important;
+  }
+
   .filters-button-desktop {
     display: none !important;
   }
 
-  /* Show mobile filters button below sidebar */
+  /* Show mobile filters row below sidebar */
+  .filters-row-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
   .filters-button-mobile {
     display: flex;
     width: 100%;
     justify-content: center;
-    margin-bottom: 20px;
+  }
+
+  /* Mobile filter pills - horizontal wrap */
+  .filter-pills-mobile {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
   }
 
   /* Keep mobile filter toggle hidden */
@@ -2095,12 +2146,6 @@ h3.chart-title {
     font-size: 14px;
   }
 
-  /* Filter pills styling at top on mobile */
-  .filter-pills-top {
-    padding: 8px 0;
-    margin-bottom: 16px;
-  }
-
   /* Bottom bar on mobile - hide download button */
   .survey-bottom-bar {
     display: none;
@@ -2116,9 +2161,9 @@ h3.chart-title {
   height: 100%;
   display: flex;
   flex-direction: column;
-  animation: fadeIn 0.3s ease;
   box-sizing: border-box;
   min-width: 0; /* Allow flex child to shrink */
+  min-height: 600px; /* Stable minimum height to prevent shift */
 }
 
 .metric-header-chart {

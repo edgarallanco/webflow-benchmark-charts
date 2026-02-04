@@ -22,41 +22,51 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
     const minValue = Math.min(...values);
     const maxValue = Math.max(...values);
 
+    // Helper to find nice tick interval from allowed list
+    // Allowed: 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, etc.
+    // - Use 2 only for very small ranges
+    // - Include 25, 250, 2500 etc. (divisible by 5)
+    const getNiceTickInterval = (maxVal, targetTicks = 5) => {
+      const rawInterval = maxVal / targetTicks;
+
+      // Generate list of nice intervals: 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, ...
+      const niceIntervals = [];
+      for (let power = 0; power < 6; power++) {
+        const base = Math.pow(10, power);
+        // Only include 2 for very small ranges (base < 10)
+        if (base < 10) {
+          niceIntervals.push(2 * base);  // 2
+        }
+        niceIntervals.push(5 * base);      // 5, 50, 500, 5000, ...
+        niceIntervals.push(10 * base);     // 10, 100, 1000, 10000, ...
+        // Include 20, 25, 200, 250, etc.
+        if (base >= 10) {
+          niceIntervals.push(2 * base);    // 20, 200, 2000, ...
+          niceIntervals.push(2.5 * base);  // 25, 250, 2500, ... (still divisible by 5)
+        }
+      }
+
+      // Sort and find smallest interval >= rawInterval
+      niceIntervals.sort((a, b) => a - b);
+      const interval = niceIntervals.find(i => i >= rawInterval) || niceIntervals[niceIntervals.length - 1];
+
+      return interval;
+    };
+
     // Determine Y-axis bounds based on data
     let yAxisMin, yAxisMax, tickAmount;
 
-    if (format === 'percentage') {
-      // For percentages, start at 0 or below if there are negative values
-      yAxisMin = minValue < 0 ? Math.floor(minValue / 10) * 10 - 10 : 0;
+    // Start at 0 unless there are negative values
+    yAxisMin = minValue < 0 ? Math.floor(minValue / 10) * 10 : 0;
 
-      // Smart scaling based on magnitude of values
-      if (maxValue < 1) {
-        // For small decimals (< 1), add 20% headroom
-        yAxisMax = Math.ceil(maxValue * 1.2 * 100) / 100;
-        tickAmount = 5;
-      } else if (maxValue < 10) {
-        // For values < 10, round to nearest 1 and add 2 units headroom
-        yAxisMax = Math.ceil(maxValue) + 2;
-        tickAmount = Math.min(yAxisMax - yAxisMin, 6);
-      } else {
-        // For larger values, round to nearest 10 and add 10 units headroom
-        yAxisMax = Math.ceil(maxValue / 10) * 10 + 10;
-        // Calculate tick amount to get nice round numbers (aim for ~5-6 ticks)
-        const range = yAxisMax - yAxisMin;
-        if (range <= 50) {
-          tickAmount = range / 10; // Ticks every 10
-        } else if (range <= 100) {
-          tickAmount = range / 20; // Ticks every 20
-        } else {
-          tickAmount = 5; // Default to 5 ticks for large ranges
-        }
-      }
-    } else {
-      // For other formats, use similar logic
-      yAxisMin = minValue < 0 ? Math.floor(minValue * 0.9) : 0;
-      yAxisMax = Math.ceil(maxValue * 1.2);
-      tickAmount = 5;
-    }
+    // Target 5 intervals above baseline
+    const tickInterval = getNiceTickInterval(maxValue - yAxisMin, 5);
+
+    // Round max up and add one interval for headroom to prevent label cutoff
+    yAxisMax = Math.ceil(maxValue / tickInterval) * tickInterval + tickInterval;
+
+    // Calculate tick amount
+    tickAmount = Math.round((yAxisMax - yAxisMin) / tickInterval);
 
     return {
       fill: {
@@ -253,6 +263,12 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
   // Expose download methods to parent via ref
   useImperativeHandle(ref, () => ({
     download: (downloadFormat) => {
+      // Prevent download if no data is available
+      if (!chartData) {
+        console.warn('Cannot download: No data available');
+        return;
+      }
+
       console.log('Download called with format:', downloadFormat);
       console.log('Chart instance:', chartInstanceRef.current);
 
@@ -332,10 +348,10 @@ const BenchmarkDataDisplay = forwardRef(({ metricName, metricLabel, metricDescri
         <div className="metric-header-chart">
           <div className="metric-header-content">
             <h2 className="metric-title-chart">{metricLabel}</h2>
+            {metricDescription && (
+              <p className="metric-description-chart">{metricDescription}</p>
+            )}
           </div>
-          {metricDescription && (
-            <p className="metric-description-chart">{metricDescription}</p>
-          )}
         </div>
         <div className="no-data-message">
           <svg width="48" height="48" viewBox="0 0 48 48" fill="none" style={{ marginBottom: '16px' }}>

@@ -115,6 +115,18 @@ export const BENCHMARK_CATEGORIES = {
         format: 'percentage'
       },
       {
+        name: 'Percentage of Reps Exceeding Quota (Most Recent Period) - All Sales Reps',
+        label: 'Percentage of Reps Exceeding Quota (Most Recent Period) - All Sales Reps',
+        description: 'Percentage of all reps exceeding quota (for the last quota period)',
+        format: 'percentage'
+      },
+      {
+        name: 'Percentage of Reps Exceeding Quota (Most Recent Period) - Fully Ramped Reps',
+        label: 'Percentage of Reps Exceeding Quota (Most Recent Period) - Fully Ramped Reps',
+        description: 'Percentage of fully ramped reps exceeding quota (for the last quota period)',
+        format: 'percentage'
+      },
+      {
         name: 'Sales Rep Turnover Rate',
         label: 'Annual Sales Rep Turnover Rate',
         description: 'Rep departures over the last year divided by total number of reps one year ago, expressed as a percentage',
@@ -197,6 +209,30 @@ export const BENCHMARK_CATEGORIES = {
         label: 'Ops Headcount as Percentage of Total GTM Headcount',
         description: '',
         format: 'percentage'
+      },
+      {
+        name: 'Partners and Channel Headcount as a Percentage of Total GTM Headcount',
+        label: 'Partners and Channel Headcount as a Percentage of Total GTM Headcount',
+        description: '',
+        format: 'percentage'
+      },
+      {
+        name: 'SDR to Sales Rep Ratio',
+        label: 'SDR to Sales Rep Ratio',
+        description: '',
+        format: 'ratio'
+      },
+      {
+        name: 'Sales Engineer to Sales Rep Ratio',
+        label: 'Sales Engineer to Sales Rep Ratio',
+        description: '',
+        format: 'ratio'
+      },
+      {
+        name: 'Customer Success to Sales Rep Ratio',
+        label: 'Customer Success to Sales Rep Ratio',
+        description: '',
+        format: 'ratio'
       }
     ]
   },

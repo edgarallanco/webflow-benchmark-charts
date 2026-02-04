@@ -5,6 +5,7 @@ import BenchmarkSidebar from './BenchmarkSidebar';
 import BenchmarkDataDisplay from './BenchmarkDataDisplay';
 import BenchmarkFilters from './BenchmarkFilters';
 import { BENCHMARK_CATEGORIES } from '../data/benchmarkMetrics';
+import { getChartData } from '../data/benchmarkData';
 
 export default function BenchmarkSurveyLayout({ className = '', children }) {
   const [activeCategory, setActiveCategory] = useState('overall-performance-metrics');
@@ -55,15 +56,50 @@ export default function BenchmarkSurveyLayout({ className = '', children }) {
         {/* Top Bar with Choose Benchmark + Filters */}
         <div className="survey-header-bar">
           <h2 className="survey-section-title">Choose Your Benchmark</h2>
-          <button
-            className={`filters-button filters-button-desktop ${showFilters ? 'active' : ''}`}
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <span>Filters</span>
-            <svg width="12" height="8" viewBox="0 0 12 8" fill="none" className={showFilters ? 'rotated' : ''}>
-              <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
+          <div className="filters-row-desktop">
+            {/* Active Filter Pills - Desktop only (inline with Filters button) */}
+            {Object.keys(filters).some(key => filters[key] && filters[key].length > 0) && (
+              <div className="filter-pills-container filter-pills-header">
+                {Object.entries(filters).map(([filterKey, values]) => {
+                  if (!values || values.length === 0) return null;
+                  return values.map((value, index) => (
+                    <div key={`${filterKey}-${index}`} className="filter-pill">
+                      <span className="filter-pill-text">{value}</span>
+                      <button
+                        className="filter-pill-remove"
+                        onClick={() => {
+                          const newValues = values.filter(v => v !== value);
+                          setFilters({
+                            ...filters,
+                            [filterKey]: newValues.length > 0 ? newValues : undefined
+                          });
+                        }}
+                        aria-label={`Remove ${value} filter`}
+                      >
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                          <path
+                            d="M9 3L3 9M3 3L9 9"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  ));
+                })}
+              </div>
+            )}
+            <button
+              className={`filters-button filters-button-desktop ${showFilters ? 'active' : ''}`}
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <span>Filters</span>
+              <svg width="12" height="8" viewBox="0 0 12 8" fill="none" className={showFilters ? 'rotated' : ''}>
+                <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
         </div>
         {/* Main Content Area */}
         <div className="survey-content">
@@ -93,16 +129,51 @@ export default function BenchmarkSurveyLayout({ className = '', children }) {
           />
         </div>
 
-        {/* Mobile Filters Button - Shows below sidebar on mobile */}
-        <button
-          className={`filters-button filters-button-mobile ${showFilters ? 'active' : ''}`}
-          onClick={() => setShowFilters(!showFilters)}
-        >
-          <span>Filters</span>
-          <svg width="12" height="8" viewBox="0 0 12 8" fill="none" className={showFilters ? 'rotated' : ''}>
-            <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
+        {/* Mobile Filters Button + Pills - Shows below sidebar on mobile */}
+        <div className="filters-row-mobile">
+          <button
+            className={`filters-button filters-button-mobile ${showFilters ? 'active' : ''}`}
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <span>Filters</span>
+            <svg width="12" height="8" viewBox="0 0 12 8" fill="none" className={showFilters ? 'rotated' : ''}>
+              <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          {/* Active Filter Pills - Mobile only */}
+          {Object.keys(filters).some(key => filters[key] && filters[key].length > 0) && (
+            <div className="filter-pills-container filter-pills-mobile">
+              {Object.entries(filters).map(([filterKey, values]) => {
+                if (!values || values.length === 0) return null;
+                return values.map((value, index) => (
+                  <div key={`${filterKey}-${index}`} className="filter-pill">
+                    <span className="filter-pill-text">{value}</span>
+                    <button
+                      className="filter-pill-remove"
+                      onClick={() => {
+                        const newValues = values.filter(v => v !== value);
+                        setFilters({
+                          ...filters,
+                          [filterKey]: newValues.length > 0 ? newValues : undefined
+                        });
+                      }}
+                      aria-label={`Remove ${value} filter`}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path
+                          d="M9 3L3 9M3 3L9 9"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                ));
+              })}
+            </div>
+          )}
+        </div>
 
         {/* Main Area */}
         <div className="survey-main-full">
@@ -124,40 +195,6 @@ export default function BenchmarkSurveyLayout({ className = '', children }) {
                     />
                   </div>
                 </>
-              )}
-
-              {/* Active Filter Pills - Above chart */}
-              {Object.keys(filters).some(key => filters[key] && filters[key].length > 0) && (
-                <div className="filter-pills-container filter-pills-top">
-                  {Object.entries(filters).map(([filterKey, values]) => {
-                    if (!values || values.length === 0) return null;
-                    return values.map((value, index) => (
-                      <div key={`${filterKey}-${index}`} className="filter-pill">
-                        <span className="filter-pill-text">{value}</span>
-                        <button
-                          className="filter-pill-remove"
-                          onClick={() => {
-                            const newValues = values.filter(v => v !== value);
-                            setFilters({
-                              ...filters,
-                              [filterKey]: newValues.length > 0 ? newValues : undefined
-                            });
-                          }}
-                          aria-label={`Remove ${value} filter`}
-                        >
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path
-                              d="M9 3L3 9M3 3L9 9"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    ));
-                  })}
-                </div>
               )}
 
               {/* Data Content */}
@@ -203,64 +240,66 @@ export default function BenchmarkSurveyLayout({ className = '', children }) {
             </div>
           </div>
 
-          {/* Download Button - Bottom Bar */}
-          <div className="survey-bottom-bar">
-            {/* Download Button */}
-            <div className="survey-download-section-bottom">
-              <button
-                className="download-button"
-                onClick={() => setShowDownloadMenu(!showDownloadMenu)}
-              >
-                <span>Download</span>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path
-                    d="M6 2V10M6 10L3 7M6 10L9 7"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
+          {/* Download Button - Bottom Bar (only show when data is available) */}
+          {selectedMetric && getChartData(selectedMetric.name, filters) && (
+            <div className="survey-bottom-bar">
+              {/* Download Button */}
+              <div className="survey-download-section-bottom">
+                <button
+                  className="download-button"
+                  onClick={() => setShowDownloadMenu(!showDownloadMenu)}
+                >
+                  <span>Download</span>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path
+                      d="M6 2V10M6 10L3 7M6 10L9 7"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
 
-              {/* Download Menu */}
-              {showDownloadMenu && (
-                <>
-                  <div className="download-menu-backdrop" onClick={() => setShowDownloadMenu(false)}></div>
-                  <div className="download-menu">
-                    <div className="download-menu-header">File Format</div>
-                    <button
-                      className="download-menu-item"
-                      onClick={() => {
-                        chartDisplayRef.current?.download('SVG');
-                        setShowDownloadMenu(false);
-                      }}
-                    >
-                      SVG
-                    </button>
-                    <button
-                      className="download-menu-item"
-                      onClick={() => {
-                        chartDisplayRef.current?.download('PNG');
-                        setShowDownloadMenu(false);
-                      }}
-                    >
-                      PNG
-                    </button>
-                    <button
-                      className="download-menu-item"
-                      onClick={() => {
-                        chartDisplayRef.current?.download('CSV');
-                        setShowDownloadMenu(false);
-                      }}
-                    >
-                      CSV
-                    </button>
-                  </div>
-                </>
-              )}
+                {/* Download Menu */}
+                {showDownloadMenu && (
+                  <>
+                    <div className="download-menu-backdrop" onClick={() => setShowDownloadMenu(false)}></div>
+                    <div className="download-menu">
+                      <div className="download-menu-header">File Format</div>
+                      <button
+                        className="download-menu-item"
+                        onClick={() => {
+                          chartDisplayRef.current?.download('SVG');
+                          setShowDownloadMenu(false);
+                        }}
+                      >
+                        SVG
+                      </button>
+                      <button
+                        className="download-menu-item"
+                        onClick={() => {
+                          chartDisplayRef.current?.download('PNG');
+                          setShowDownloadMenu(false);
+                        }}
+                      >
+                        PNG
+                      </button>
+                      <button
+                        className="download-menu-item"
+                        onClick={() => {
+                          chartDisplayRef.current?.download('CSV');
+                          setShowDownloadMenu(false);
+                        }}
+                      >
+                        CSV
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
